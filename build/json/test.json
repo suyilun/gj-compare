@@ -1,0 +1,46 @@
+{
+  "people":{"name":"张贤","userNumber":"330327199409092674"},
+  "content":[
+    {
+      "hbase_zj":"bdsahjghdgaj-00608-dasdsaddhjgdsnvcxgh434588s",
+      "item1":"布丁酒店",
+      "item2":"222",
+      "item3":"20170102111112",
+      "item4":"2017-01-2 01:11:12"
+    },
+    {
+      "hbase_zj":"bdsahjghdgaj-00608-dasdsaddhjgdsnvcxgh43288s",
+      "item1":"布丁酒店1",
+      "item2":"333",
+      "item3":"20171101121112",
+      "item4":"2017-11-02 12:11:12"
+    },
+    {
+      "hbase_zj":"bdsahjghdgaj-00608-dasdsaddhjgdsnvcxgh43288s",
+      "item1":"布丁酒店1",
+      "item2":"333",
+      "item3":"20171105111112",
+      "item4":"2017-11-02 14:11:12"
+    },
+    {
+      "hbase_zj":"bdsahjghdgaj-00608-dasdsaddhjgdsnvcxgh43288s",
+      "item1":"布丁酒店1",
+      "item2":"333",
+      "item3":"20171105121113",
+      "item4":"2017-11-02 11:11:12"
+    },
+    {
+      "hbase_zj":"bdsahjghdgaj-00608-dasdsaddhjgdsnvcxgh434588s",
+      "item1":"布丁酒店",
+      "item2":"222",
+      "item3":"20170106131113",
+      "item4":"2017-01-2 10:11:12"
+    },{
+      "hbase_zj":"bdsahjghdgaj-00608-dasdsaddhjgdsnvcxgh434588s",
+      "item1":"布丁酒店",
+      "item2":"222",
+      "item3":"20170106131114",
+      "item4":"2017-01-2 10:11:12"
+    }
+  ]
+}

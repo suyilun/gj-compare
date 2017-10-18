@@ -1,0 +1,121 @@
+﻿{
+  "content": [
+    {
+      "hbase_zj": "A330225198504290314-00495-22d3985bff5cd5edb7a2674377e1c008050c85a5",
+      "sta_arvetm_zhwz": "2017-06-01 00:50:00",
+      "online_time": 20170531000001,
+      "track_type": "fj_jcg",
+      "seg_dest_code_zhwz": "宁波",
+      "flt_date_zhwz": "2017-05-31",
+      "sta_depttm_zhwz": "2017-05-31 22:20:00",
+      "hbh": "MU2358",
+      "seg_dept_code_zhwz": "西安"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00488-4197b6017f48f9aa145f3e47b88a33854c650187",
+      "online_time": 20170531000000,
+      "track_type": "fj_lg",
+      "lkzwxm": "管江宇",
+      "jgsj": "20170601005000",
+      "hbh": "2358",
+      "lgsj": "20170531222000",
+      "hkgs": "东方航空公司",
+      "lkzwxx": "43K"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00495-e976db46c40f29c40098df5acd979e82ff01b0f0",
+      "sta_arvetm_zhwz": "2017-05-28 15:35:00",
+      "online_time": 20170528000001,
+      "track_type": "fj_jcg",
+      "seg_dest_code_zhwz": "西安",
+      "flt_date_zhwz": "2017-05-28",
+      "sta_depttm_zhwz": "2017-05-28 11:25:00",
+      "hbh": "9H8328",
+      "seg_dept_code_zhwz": "温州"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00608-aa47583017f5b10cf71d53db4328a56baa98df3c",
+      "online_time": 20170528000001,
+      "track_type": "hc_jz",
+      "to_telecode_mc": "温州南",
+      "send_time": "2017-05-28 06:21:11",
+      "coach_no": "06",
+      "ticket_no": "9793971",
+      "id_name": "管江宇",
+      "seat_no": "005B",
+      "from_telecode_mc": "宁波",
+      "train_code": "D3219"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00488-a8cf3ffcf8220b5ba4d2341540470b98e9484299",
+      "online_time": 20170528000000,
+      "track_type": "fj_lg",
+      "lkzwxm": "管江宇",
+      "jgsj": "20170528153500",
+      "hbh": "8328",
+      "lgsj": "20170528112500",
+      "lkzwxx": "56J"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00491-3da7250d14a7d7977de2b8a40a87d93e79044f76",
+      "online_time": 20170227000001,
+      "track_type": "hc_dp",
+      "lcsj_zhwz": "2017-02-27",
+      "ckxm": "管江宇",
+      "cfz": "杭州东",
+      "ddz": "宁波",
+      "cc": "D3231"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00608-7b8bcb3e4a7b99f70053f78b35732309898e6cc3",
+      "online_time": 20170227000000,
+      "track_type": "hc_jz",
+      "to_telecode_mc": "宁波",
+      "send_time": "2017-02-27 06:25:08",
+      "coach_no": "11",
+      "ticket_no": "F053929",
+      "id_name": "管江宇",
+      "seat_no": "015D",
+      "from_telecode_mc": "杭州东",
+      "train_code": "D3231"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00497-cd55cae56c1601ae39f6b11b1201607c88981dd8",
+      "online_time": 20170225211500,
+      "track_type": "lg_zj",
+      "rzsj_zhwz": "2017-02-25 21:15:00",
+      "xm": "管江宇",
+      "lgdz": "白石巷318号",
+      "fh": "8521",
+      "lgmc": "杭州驿锦酒店管理有限公司",
+      "ldsj_zhwz": "2017-02-27 20:02:04"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00491-6b1a1eff63d8546232ce32aa28ecb22323e258d5",
+      "online_time": 20170225000001,
+      "track_type": "hc_dp",
+      "lcsj_zhwz": "2017-02-25",
+      "ckxm": "管江宇",
+      "cfz": "宁波",
+      "ddz": "杭州东",
+      "cc": "D3202"
+    },
+    {
+      "hbase_zj": "A330225198504290314-00608-2ba6904851bc3c42e137b353dbe64c8b0a3f0890",
+      "online_time": 20170225000000,
+      "track_type": "hc_jz",
+      "to_telecode_mc": "杭州东",
+      "send_time": "2017-02-25 18:04:14",
+      "coach_no": "03",
+      "ticket_no": "E004495",
+      "id_name": "管江宇",
+      "seat_no": "013B",
+      "from_telecode_mc": "宁波",
+      "train_code": "D3202"
+    }
+  ],
+  "people": {
+    "name": "管江宇",
+    "userNumber": "330225198504290314"
+  }
+}

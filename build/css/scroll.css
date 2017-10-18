@@ -1,0 +1,58 @@
+@charset "utf-8";
+/* CSS Document */ 
+/*只有谷歌有效果，可能IE也有吧*/ 
+/*滚动条宽度*/
+.core-scroll::-webkit-scrollbar{
+	width:6px;
+	height:6px;
+}
+/*两个方向的按钮背景色*/
+.core-scroll::-webkit-scrollbar-button{
+	background-color:transparent;
+}
+/*滚动条背景色*/
+.core-scroll::-webkit-scrollbar-track{
+	background-color:transparent;
+}
+/*可滚动区域背景色*/
+.core-scroll::-webkit-scrollbar-track-piece{
+	background-color:transparent;
+}
+/*滚动滑块*/
+.core-scroll::-webkit-scrollbar-thumb{
+	background-color:rgba(50,50,50,0.2);
+	border-radius:4px;
+}
+.b-right::-webkit-scrollbar-thumb{
+	background-color:rgba(50,50,50,0.5);
+	border-radius:4px;
+}
+/*右下角那个小方块*/
+.core-scroll::-webkit-scrollbar-corner{
+	background-color:transparent;
+}
+/*滚动滑块*/
+.core-scroll::-webkit-scrollbar-resizer{
+	background-color:#FF0BEE;
+}
+
+/*适用IE*/
+.core-scroll{
+	/*设置滚动框和滚动条箭头的颜色*/
+	scrollbar-face-color: #fcfcfc;
+	/*设置滚动框的和滚动条箭头左上边缘的颜色*/
+	scrollbar-highlight-color: #6c6c90;
+	/*设置滚动框的和滚动条箭头右下边缘的颜色*/
+	scrollbar-shadow-color: #fcfcfc;
+	/*设置滚动框的和滚动条箭头左上边缘的颜色*/
+	scrollbar-3dlight-color: #fcfcfc;
+	/*设置滚动条箭头的颜色*/
+	scrollbar-arrow-color: #240024;
+	/*设置滚动条轨迹组成部分的颜色*/
+	scrollbar-track-color: #fcfcfc;
+	/*设置滚动条槽的颜色*/
+	scrollbar-darkshadow-color: #48486c;
+	/*设置滚动条主要构成部分的颜色*/
+	scrollbar-base-color: #fcfcfc;
+}
+
