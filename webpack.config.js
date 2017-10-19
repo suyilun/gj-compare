@@ -46,7 +46,8 @@ const webpackOptions = {
     module: {
         loaders: [{
             test: /\.(css)$/,
-            loaders: ['style-loader', 'css-loader?modules&localIdentName=[local]-[hash:base64:5]', 'less-loader'],
+            loaders: ['style-loader', 'css-loader', 'less-loader'],
+            //loaders: ['style-loader', 'css-loader?modules&localIdentName=[local]-[hash:base64:5]', 'less-loader'],
         },
             {
                 test: /\.(less)$/,

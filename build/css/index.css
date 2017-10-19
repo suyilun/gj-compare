@@ -321,8 +321,11 @@ body{
 }
 .b-left{
 	float:left;
-	width:100%;
+	clear:both;
+	width:110px;
 	border-top: 1px solid #e6e6e6;
+	border-right: 1px solid #e6e6e6;
+
 	background-color:#fff;
 	text-align:center;
 }

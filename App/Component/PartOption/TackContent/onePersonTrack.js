@@ -5,7 +5,7 @@ import { showDetail } from "../../../Actions/Actions";
 
 
 
-const cardClassName="life-single life-day";
+const cardClassName = "life-single life-day";
 
 const wbCard = (type_org, dataContent) => {
     return (
@@ -259,66 +259,57 @@ const ylWsCard = (type_org, dataContent) => {
 
 
 
-function mapStateToProps(state) {
-    return {
-        showContent: (type, dataContent) => {
-            let type_org = type.split("_")[0];
-            switch (type) {
-                case "wb": return wbCard(type_org, dataContent);
-                case "wb_zj": return wbZjCard(type_org, dataContent);
-                case "lg": return lgCard(type_org, dataContent);
-                case "lg_zj": return lgZjCard(type_org, dataContent);
-                case "hc": return hcCard(type_org, dataContent);
-                case "hc_dp": return hcDpCard(type_org, dataContent);
-                case "hc_jz": return hcJzCard(type_org, dataContent);
-                case "ky": return kyCard(type_org, dataContent);
-                case "fj": return fjCard(type_org, dataContent);
-                case "fj_dz": return fjDzCard(type_org, dataContent);
-                case "fj_jcg": return fjJcgCard(type_org, dataContent);
-                case "fj_lg": return fjLgCard(type_org, dataContent);
-                case "zk": return zkCard(type_org, dataContent);
-                case "zk_zj": return zkZjCard(type_org, dataContent);
-                case "yl_zj": return ylZjCard(type_org, dataContent);
-                case "yl_ws": return ylWsCard(type_org, dataContent);
-                case "ck": return ckCard(type_org, dataContent);
-                case "zd": return zdCard(type_org, dataContent);
-                case "": return "";
-            }
-        }
+const showContent = (type, dataContent) => {
+    //console.log("showContent", type, dataContent)
+    let type_org = type.split("_")[0];
+    switch (type) {
+        case "wb": return wbCard(type_org, dataContent);
+        case "wb_zj": return wbZjCard(type_org, dataContent);
+        case "lg": return lgCard(type_org, dataContent);
+        case "lg_zj": return lgZjCard(type_org, dataContent);
+        case "hc": return hcCard(type_org, dataContent);
+        case "hc_dp": return hcDpCard(type_org, dataContent);
+        case "hc_jz": return hcJzCard(type_org, dataContent);
+        case "ky": return kyCard(type_org, dataContent);
+        case "fj": return fjCard(type_org, dataContent);
+        case "fj_dz": return fjDzCard(type_org, dataContent);
+        case "fj_jcg": return fjJcgCard(type_org, dataContent);
+        case "fj_lg": return fjLgCard(type_org, dataContent);
+        case "zk": return zkCard(type_org, dataContent);
+        case "zk_zj": return zkZjCard(type_org, dataContent);
+        case "yl_zj": return ylZjCard(type_org, dataContent);
+        case "yl_ws": return ylWsCard(type_org, dataContent);
+        case "ck": return ckCard(type_org, dataContent);
+        case "zd": return zdCard(type_org, dataContent);
+        case "": return "";
     }
-}
+};
 
-function mapDispatchToProps(dispatch) {
-    return {
-        showDetailFunc: () => {
-            dispatch(Actions.loadDetail())
-        }
-    }
-}
 
-const OptionShow = ({ isNewDay, user, showDetailFunc, dataContent, showContent }) => (
-    <li className={isNewDay ? 'life-border frist' : 'life-border'} onClick={showDetailFunc}>
-        {showContent(dataContent == undefined ? "" : dataContent.track_type, dataContent)}
-    </li>
-)
+
+// function mapDispatchToProps(dispatch) {
+//     return {
+//         showDetailFunc: () => {
+//             dispatch(Actions.loadDetail())
+//         }
+//     }
+// }
+
 
 class OnePersonTrack extends React.Component {
     constructor(props) {
         super(props);
     }
     render() {
-        let { isNewDay, userNumber, showDetailFunc, dataContent, showContent } = this.props;
+        let { isNewDay, userNumber, showDetailFunc, dataContent } = this.props;
         return (
-            <OptionShow 
-                isNewDay={isNewDay} 
-                user={userNumber} 
-                showDetailFunc={showDetailFunc} 
-                dataContent={dataContent} 
-                showContent={showContent} />
+            <li className={isNewDay ? 'life-border frist' : 'life-border'} onClick={showDetailFunc}>
+                {showContent(dataContent == undefined ? "" : dataContent.track_type, dataContent)}
+            </li>
         );
     }
 }
 
-
-export default connect(mapStateToProps, mapDispatchToProps
-)(OnePersonTrack)
+export default OnePersonTrack;
+// export default connect(((state) => ({}))
+// )(OnePersonTrack)

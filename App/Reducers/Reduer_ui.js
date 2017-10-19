@@ -1,55 +1,66 @@
 import ActionTypes from '../Actions/ActionTypes';
 
-const ui=(state=initUI,action)=>{
+const ui = (state = initUI, action) => {
     //console.log("进入reduce-UI:",state)
     return {
-        Top:changeTop(state.Top,action),
-        Detail:changeDetail(state.Detail,action),
-        isLoad:changdLoadStatus(state.isLoad,action)
+        Top: changeTop(state.Top, action),
+        Detail: changeDetail(state.Detail, action),
+        isLoad: changdLoadStatus(state.isLoad, action),
+        showChart: function (action) {
+            switch (action.type) {
+                case ActionTypes.UI.CHANGE_SHOW_CHART:
+                    return action.showChart;
+                default: return false;
+            }
+        }(action)
     }
-
 }
 /*
 初始化开始
  */
-const initUI={
-    Top:{showTop:true},
-    Detail:{showDetsil:false},
-    isLoad:{isLoadStatus:false}
+const initUI = {
+    Top: { showTop: true },
+    Detail: { showDetsil: false },
+    isLoad: { isLoadStatus: false },
+    showChart: false
 }
 
 /*
  初始化结束
  */
 
-function changeTop(state,action){
+function changeTop(state, action) {
     //console.log("changeUI",action);
-    switch(action.type){
+    switch (action.type) {
         case ActionTypes.UI.TOPSHOW:
-            return Object.assign({},state,{showTop:!action.isShow});
+            return Object.assign({}, state, { showTop: !action.isShow });
         default:
             return state;
     }
 
 }
 
-function changeDetail(state,action) {
+function changeDetail(state, action) {
     //console.log("changeDetail",action);
-    switch(action.type){
+    switch (action.type) {
         case ActionTypes.UI.DETAILSHOW:
-            return Object.assign({},state,{showDetail:action.isShow});
+            return Object.assign({}, state, { showDetail: action.isShow });
         default:
             return state;
     }
 }
-function changdLoadStatus(state,action) {
+
+
+function changdLoadStatus(state, action) {
     //console.log("chngeLoad",action);
-    switch (action.type){
+    switch (action.type) {
         case ActionTypes.UI.LOADWAIT:
-            return Object.assign({},state,{isLoadStatus:action.loadStatus})
+            return Object.assign({}, state, { isLoadStatus: action.loadStatus })
         default:
             return state
     }
 }
+
+
 
 export default ui

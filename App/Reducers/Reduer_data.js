@@ -1,5 +1,6 @@
 import ActionTypes from '../Actions/ActionTypes';
 
+
 const data = (state = {}, action) => {
     //console.log("进入reduce-data:",action)
     return {
@@ -7,9 +8,9 @@ const data = (state = {}, action) => {
         loadData: loadData(state.loadData, action),
         mappings: mappings(state.mappings, action),
         timeIndex: timeIndex(state.timeIndex, action),
-        oneTrackDetail: oneTrackDetail(state.oneTrackDetail, action)
+        oneTrackDetail: oneTrackDetail(state.oneTrackDetail, action),
+        chartData: chartData(state.chartData, action)
     }
-
 }
 //加载数据是选出相同的MD5和date
 function desc(state = { md5_area: {}, date_area: {} }, action) {
@@ -95,36 +96,45 @@ function mappings(state = {}, action) {
     }
 }
 
+function dayArrayToTimeDataArray(dayArray) {
+    const daySortArray = dayArray.sort();
+    let nextTime; let nextMonth; let dayData = [];
+    const timeDataArray = [];
+    daySortArray.map((time, index) => {
+        time = String(time);
+        // console.log(index,time);
+        if (nextTime == undefined || nextTime.substr(0, 8) != time.substr(0, 8)) { //判断是不是新的一天或最后一天
+            // let dayData = oneDay;
+            nextTime = time.substr(0, 8);
+            nextMonth = time.substr(0, 6);
+            dayData = [];
+            timeDataArray.push({ month: nextMonth, day: nextTime, dayData: dayData })
+        }
+        dayData.push(time.substr(8, 2));
+    })
+    return timeDataArray;
+}
+
 
 //初始化时间轴
-function timeIndex(state = { daySortArray:[],timeNow: null, timeData: [], timePos: [] }, action) {
+function timeIndex(state = { daySortArray: [], timeNow: null, timeDataArray: [], timePos: [] }, action) {
     switch (action.type) {
         case ActionTypes.DATA.INIT_TIME_INDEX:
-            if (action.descDateArea) {
+            console.log("timeIndex action.descDataArea :%o", action.descDateArea)
+            if (action.descDateArea && Object.keys(action.descDateArea).length > 0) {
                 let dayArray = [];
-                for (let key in action.descDateArea) {
-                    dayArray.push(key)
-                }
-                const daySortArray = dayArray.sort();
-                let timeNow = daySortArray[0].substr(0,6);
-                if (state.timeNow != null) {
-                    timeNow=state.timeNow;
-                }
-                let nextTime; let oneDay = [];
-                const newTimeData=[];
-                 daySortArray.map((time, index) => {
-                    // console.log(index,time);
-                    if (nextTime == undefined || nextTime.substr(0,8) != time.substr(0, 8)) { //判断是不是新的一天或最后一天
-                        // let dayData = oneDay;
-                        nextTime = time.substr(0, 8);
-                        oneDay = [];
-                        newTimeData.push({day:nextTime,oneDay:oneDay})
-                    }
-                    oneDay.push(time.substr(6,2));
-                })
-                return {daySortArray,timeNow,timeData:newTimeData};
+                const daySortArray = Object.keys(action.descDateArea).map(key => {
+                    return key;
+                }).sort();
+                const timeNow = state.timeNow || daySortArray[0].substr(0, 6);
+                // if (state.timeNow != null) {
+                //     timeNow = state.timeNow;
+                // }
+                const timeDataArray = dayArrayToTimeDataArray(daySortArray);
+                return { daySortArray, timeNow, timeDataArray };
+            } else {
+                return { daySortArray: [], timeNow: null, timeDataArray: [] };
             }
-            return state;
         default:
             return state;
     }
@@ -140,6 +150,24 @@ function oneTrackDetail(state = {}, action) {
     }
 
 }
+
+
+function chartData(chartDataInState = {}, action) {
+    switch (action.type) {
+        case ActionTypes.CHART.CHART_ADD_DATA:
+            const { dateArr, userNumber } = action;
+            console.log("chartData dateArr :", dateArr)
+            const timeDataArray = dayArrayToTimeDataArray(dateArr.sort());
+            //[{month,day,dayData:[]}]
+            return Object.assign({}, chartDataInState, { [userNumber]: timeDataArray });
+        case ActionTypes.CHART.CHART_DELETE_DATA:
+            delete chartDataInState[action.userNumber];
+            return chartDataInState;
+        default:
+            return chartDataInState;
+    }
+}
+
 
 export default data
 

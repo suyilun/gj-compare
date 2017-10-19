@@ -6,6 +6,7 @@ import AppLayouts from "./Layout/AppLayouts";
 import {Provider} from 'react-redux';
 import {createStore, applyMiddleware} from 'redux';
 require("./app.less")
+
 /**thunkMiddleware允许我们dispatch()函数*/
 ReactDOM.render(
     <Provider store={createStore(Reducers,applyMiddleware(thunkMiddleware))}>
