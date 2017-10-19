@@ -123,7 +123,7 @@ const TraceChart = ({ userChartDataMonth }) => (
         xType="ordinal"
         yDomain={[userChartDataMonth.min, userChartDataMonth.max]}
         width={document.body.clientWidth - 116}
-        height={160} >
+        height={139} >
         <VerticalGridLines />
         <HorizontalGridLines />
         <XAxis />
@@ -138,6 +138,17 @@ const TraceChart = ({ userChartDataMonth }) => (
             )
         }
     </XYPlot>
+);
+
+const BaseTimeLine = ({ timeIndex }) => (
+    <div className="life-time-contant max-content">
+        {timeIndex.timeDataArray.map((timeData => {
+            return (<OneDayIndex day={timeData.day} dayData={timeData.dayData} />)
+        }))}
+        <div className="life-today life-end">
+            <p className="today-time life-radius">End</p>
+        </div>
+    </div>
 );
 
 
@@ -159,9 +170,9 @@ class Content extends React.Component {
         //console.log("是否显示Top",isTopShow);
         let height = {};
         if (ui.Top.showTop) {
-            height = document.body.clientHeight - 152;
+            height = document.body.clientHeight - 152 - 60;//60 每个减少20像素获取的
         } else {
-            height = document.body.clientHeight - 85;
+            height = document.body.clientHeight - 85 - 60;
         }
 
         const { loadData, chartData, timeIndex } = data;
@@ -243,15 +254,10 @@ class Content extends React.Component {
                     </div>
                     <div
                         className="b-right" ref="timelineRef" style={{ overflowX: "hidden" }} >
-                        <div className="life-time-contant max-content">
-                            {data.timeIndex.timeDataArray.map((timeData => {
-                                return (<OneDayIndex day={timeData.day} dayData={timeData.dayData} />)
-                            }))}
-                            <div className="life-today life-end">
-                                <p className="today-time life-radius">End</p>
-                            </div>
-                        </div>
-
+                        {ui.showChart ?
+                            (<TraceChart userChartDataMonth={userChartDataMonth} />) : (
+                                <BaseTimeLine timeIndex={timeIndex} />)
+                        }
                     </div>
 
                     <DetailOption />
@@ -259,10 +265,16 @@ class Content extends React.Component {
             </Row>
         )
     }
+
+    //时间滚动条
+    //    
 }
+
+
+
 function mapStateToProps(state) {
 
-    // <TraceChart userChartDataMonth={userChartDataMonth} />
+
 
     return {
         data: state.data,

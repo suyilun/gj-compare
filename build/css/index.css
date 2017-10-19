@@ -162,8 +162,8 @@ body{
 	position: relative;
 	display: block;
 	width: 100%;
-	height: 140px;
-	padding-top: 15px;
+	height: 120px;
+	padding-top: 5px;
 	border-bottom: 1px solid #e6e6e6;
 }
 .life-person li p{
@@ -202,12 +202,13 @@ body{
 }
 .life-person li i{
 	position:absolute;
-	top:10px;
+	top:3px;
 	right:13px;
 	display:block;
 	width:12px;
 	height:12px;
 	background-color:#f4cd56;
+	cursor:pointer;
 }
 .life-person li i span{
 	position:absolute;
@@ -316,7 +317,7 @@ body{
 /*bottom*/
 .b-left,.b-right{
 	position:relative;
-	height:79px;
+	height:140px;
 	border-bottom: 1px solid #e6e6e6;
 }
 .b-left{
@@ -415,7 +416,7 @@ body{
 /*奇怪的东西都在这里*/
 .life-box{
 	width:auto;
-	height:140px;
+	height:120px;
 	overflow:hidden;
 	border-bottom:1px solid #e6e6e6
 }
@@ -426,7 +427,7 @@ body{
 	display:block;
 	float:left;
 	width:210px;
-	height:140px;
+	height:120px;
 	padding:0 10px;
 }
 .life-box li.life-border{

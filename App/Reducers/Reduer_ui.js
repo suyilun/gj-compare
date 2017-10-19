@@ -6,13 +6,13 @@ const ui = (state = initUI, action) => {
         Top: changeTop(state.Top, action),
         Detail: changeDetail(state.Detail, action),
         isLoad: changdLoadStatus(state.isLoad, action),
-        showChart: function (action) {
+        showChart: function (showChartInState, action) {
             switch (action.type) {
                 case ActionTypes.UI.CHANGE_SHOW_CHART:
                     return action.showChart;
-                default: return false;
+                default: return showChartInState;
             }
-        }(action)
+        }(state.showChart, action)
     }
 }
 /*
