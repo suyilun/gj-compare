@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import OnePersonTrack from './onePersonTrack';
 
 
-
 class PeopleDataList extends React.Component {
     constructor(props) {
         super(props);
@@ -12,10 +11,9 @@ class PeopleDataList extends React.Component {
     }
 
     renderOnePersonTrack = () => {
-        const { oneTrackDate, timeIndex, showFunc, userNumber, loadData, showDetailFunc } = this.props;
+        const { userDateMap, timeIndex, showFunc, userNumber, loadData, showDetailFunc } = this.props;
         // console.log("$$$$$$$$$$$$$$$$$%o,%o,%o",loadData,userNumber,Object.keys(loadData))
         // console.log("--------------",Object.keys(loadData))
-        let lastTime = ""; let isSameTime = false;
         let all = loadData[userNumber];
         let content = [];
         if (all != undefined) {
@@ -24,26 +22,28 @@ class PeopleDataList extends React.Component {
         //timeData
         //timeIndex
         //daySortArray 所有日期排序
-        return timeIndex.daySortArray.map((time, index) => {
-            isSameTime = lastTime == time.substr(0, 8);//判断是不是新的一天
-            if (!isSameTime) {
-                lastTime = time.substr(0, 8);
-            }
-            let indextime = oneTrackDate[time];
-            // console.log("oneTrackDate", oneTrackDate);
-            // //console.log("indextime", indextime);
-            // console.log("content",content)
-            // console.log("dataContent", content[indextime]);
-            return (
-                <OnePersonTrack
-                    isNewDay={!isSameTime}
-                    userNumber={userNumber}
-                    dataContent={content[indextime]}
-                    key={userNumber + time}
-                    showDetailFunc={showDetailFunc}
-                />
-            )
-        });
+        //push({ month: nextMonth, day: nextTime, dayData: dayData });
+        let lastTime = ""; let isSameTime = false;
+        let result = [];
+        timeIndex.timeDataArray.map((timeData) => {
+            isSameTime = lastTime == timeData.day;
+            timeData.dayData.map(timeInDay => {
+                let tmp = userDateMap[timeInDay]
+                if (tmp) {
+                    let indextime = tmp.index;
+                    result.push(
+                        <OnePersonTrack
+                            isNewDay={!isSameTime}
+                            userNumber={userNumber}
+                            dataContent={content[indextime]}
+                            key={userNumber + timeInDay}
+                            showDetailFunc={showDetailFunc}
+                        />
+                    );
+                }
+            });
+        })
+        return result;
     }
 
     render() {
@@ -54,26 +54,12 @@ class PeopleDataList extends React.Component {
                 }
                 <li className={'life-nbsp'} >
                 </li>
-
             </ul>
         )
     }
 }
 
-// function mapStateToProps(state) {
-//     return {
-//         timeIndex: state.data.timeIndex,
-//         loadData: state.data.loadData,
-//     }
-// }
 
-// function mapDispatchToProps(dispatch) {
-//     return {
-//         showDetailFunc: () => {
-//             dispatch(Actions.loadDetail())
-//         }
-//     }
-// }
 export default PeopleDataList;
 
 //export default connect(mapStateToProps,mapDispatchToProps)(PeopleDataList)

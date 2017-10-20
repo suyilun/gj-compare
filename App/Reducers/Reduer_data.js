@@ -1,6 +1,17 @@
 import ActionTypes from '../Actions/ActionTypes';
 
 
+const initOption = [
+    { optionName: '旅馆', optionClass: 'lg-life', ischeck: true, value: 'lg' },
+    { optionName: '飞机', optionClass: 'fj-life', ischeck: true, value: 'fj' },
+    { optionName: '火车', optionClass: 'hc-life', ischeck: true, value: 'hc' },
+    { optionName: '客运', optionClass: 'ky-life', ischeck: true, value: 'ky' },
+    { optionName: '医疗', optionClass: 'yl-life', ischeck: true, value: 'yl' },
+    { optionName: '暂口', optionClass: 'zk-life', ischeck: true, value: 'zk' },
+    { optionName: '网吧', optionClass: 'wb-life', ischeck: true, value: 'wb' },
+    { optionName: '其他', optionClass: 'qt-life', ischeck: true, value: 'qt' },
+]
+
 const data = (state = {}, action) => {
     //console.log("进入reduce-data:",action)
     return {
@@ -9,35 +20,52 @@ const data = (state = {}, action) => {
         mappings: mappings(state.mappings, action),
         timeIndex: timeIndex(state.timeIndex, action),
         oneTrackDetail: oneTrackDetail(state.oneTrackDetail, action),
-        chartData: chartData(state.chartData, action)
+        chartData: chartData(state.chartData, action),
+        filterData: filterData(state.filterData, action),
     }
 }
-//加载数据是选出相同的MD5和date
-function desc(state = { md5_area: {}, date_area: {} }, action) {
+
+const initFilter = () => {
+    const date = new Date();
     return {
-        md5_area: md5_area(state.md5_area, action),
-        date_area: date_area(state.date_area, action)
+        startTime: date.getFullYear() + "-01-01",
+        endTime: `${date.getFullYear()}-${date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()}-${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}`,
+        userNumber: '',
+        options: initOption,
+        getShowTypes: function () {
+            return this.options.filter((option) => { return option.ischeck }).map((option) => { return option.value })
+        }
     }
 }
+
+
+//加载数据是选出相同的MD5和date
+function desc(descInState = { md5_area: {}, date_area: {} }, action) {
+    return {
+        md5_area: md5_area(descInState.md5_area, action),
+        date_area: date_area(descInState.date_area, action)
+    };
+}
+
 
 function md5_area(state, action) {
     switch (action.type) {
         case ActionTypes.DATA.MD5_COLLECTOR:
             action.md5Arr.map((md5, index) => {
-                let timer = state[md5] == undefined ? 1 : state[md5].timer + 1
-                state[md5] = { "timer": timer }
+                let timer = state[md5] == undefined ? 1 : state[md5].timer + 1;
+                state[md5] = { "timer": timer };
             })
             return state
         case ActionTypes.DATA.MA5_DELETE_COLLECTOR:
             action.md5Arr.map((md5, index) => {
                 let timer = state[md5] == undefined ? 0 : state[md5].timer - 1;
                 if (timer == 0) {
-                    delete state[md5]
+                    delete state[md5];
                 } else {
-                    state[md5] = { "timer": timer }
+                    state[md5] = { "timer": timer };
                 }
             })
-            return state
+            return state;
         default:
             return state;
     }
@@ -68,31 +96,39 @@ function date_area(state, action) {
 }
 
 //加载原始数据state
-function loadData(state = {}, action) {
+function loadData(loadDataInState = {}, action) {
     switch (action.type) {
         case ActionTypes.DATA.ADD_RECEIVE:
-            state[action.userNumber] = action.content
-            return state;//由ajax添加数据值resource
+            loadDataInState[action.userNumber] = action.content;
+            return loadDataInState;//由ajax添加数据值resource
         case ActionTypes.DATA.DATE_DELETE:
-            delete state[action.userNumber]
-            return Object.assign({}, state)
+            delete loadDataInState[action.userNumber];
+            return Object.assign({}, loadDataInState);
         default:
-            return state;
+            return loadDataInState;
     }
-
-
 }
 //加载数据时做映射
-function mappings(state = {}, action) {
-    switch (action.type) {
+function mappings(mappingsInState = {}, action) {
+    const { type, userNumber, md5Arr, userDateMap, mappings } = action;
+    switch (type) {
         case ActionTypes.DATA.MAPPING:
-            state[action.userNumber] = { "md5Arr": action.md5Arr, "dateArr": action.dateArr }
-            return state
+            mappingsInState[userNumber] = { "md5Arr": md5Arr, "userDateMap": userDateMap };
+            return mappingsInState;
         case ActionTypes.DATA.DELETE_MAPPING:
-            delete state[action.userNumber]
-            return Object.assign({}, state)
+            delete mappingsInState[userNumber];
+            return Object.assign({}, mappingsInState);
+        case ActionTypes.OPTION.CHANGE_CHECK:
+            let newMappingsInState = {};
+            Object.keys(mappings).map(userNumberKey => {
+                newMappingsInState[userNumberKey]={userDateMap: mappings[userNumberKey]};
+                if (mappingsInState[userNumberKey]) {
+                    newMappingsInState[userNumberKey].md5Arr;
+                }
+            })
+            return newMappingsInState;
         default:
-            return state;
+            return mappingsInState;
     }
 }
 
@@ -110,33 +146,75 @@ function dayArrayToTimeDataArray(dayArray) {
             dayData = [];
             timeDataArray.push({ month: nextMonth, day: nextTime, dayData: dayData })
         }
-        dayData.push(time.substr(8, 2));
+        //过滤type
+        dayData.push(time);
     })
     return timeDataArray;
 }
 
 
 //初始化时间轴
-function timeIndex(state = { daySortArray: [], timeNow: null, timeDataArray: [], timePos: [] }, action) {
-    switch (action.type) {
-        case ActionTypes.DATA.INIT_TIME_INDEX:
-            console.log("timeIndex action.descDataArea :%o", action.descDateArea)
-            if (action.descDateArea && Object.keys(action.descDateArea).length > 0) {
-                let dayArray = [];
-                const daySortArray = Object.keys(action.descDateArea).map(key => {
-                    return key;
-                }).sort();
-                const timeNow = state.timeNow || daySortArray[0].substr(0, 6);
-                // if (state.timeNow != null) {
-                //     timeNow = state.timeNow;
-                // }
-                const timeDataArray = dayArrayToTimeDataArray(daySortArray);
-                return { daySortArray, timeNow, timeDataArray };
-            } else {
-                return { daySortArray: [], timeNow: null, timeDataArray: [] };
-            }
+function timeIndex(
+    timeIndexInState = {
+        daySortArray: [],
+        timeNow: null,
+        timeDataArray: [],
+        timePos: [],
+        userTimeTypeDataMap: {}
+    }
+    , action) {
+    const handlerUserTimeTypeDataMap = (userTimeTypeDataMap, showTypes) => {
+        // const types = filterData.getShowTypes();//所有需要显示的类型
+        const allTimes = [];
+        Object.keys(userTimeTypeDataMap).map(userNumber => {
+            const timeTypeData = userTimeTypeDataMap[userNumber].timeTypeData;
+            timeTypeData.map(
+                timeTypeDataItem => {
+                    if (!false) {//TODO判断是否过滤 filterData
+                        allTimes.push(timeTypeDataItem.time);
+                    }
+                }
+            )
+            //{time:content.online_time,track_type:content.track_type,show:true}
+        });
+        const allTimeSort = allTimes.sort();
+        return { timeDataArray: dayArrayToTimeDataArray(allTimeSort) };
+    }
+    const { type, userTimeTypeData, userNumber } = action
+    const { userTimeTypeDataMap } = timeIndexInState
+    switch (type) {
+        case ActionTypes.DATA.ADD_USER_TIME_INDEX:
+            userTimeTypeDataMap[userTimeTypeData.userNumber] = userTimeTypeData;
+            return Object.assign({}, timeIndexInState,
+                handlerUserTimeTypeDataMap(userTimeTypeDataMap));
+        case ActionTypes.DATA.DEL_USER_TIME_INDEX:
+            delete userTimeTypeDataMap[userNumber];
+            return Object.assign({}, timeIndexInState,
+                handlerUserTimeTypeDataMap(userTimeTypeDataMap));
         default:
-            return state;
+            return timeIndexInState;
+
+        // Object.keys(userDateTypeConfigMap).map((userNumber,index)=>{
+        //     const userDateTypeConfig=userDateTypeConfigMap[userNumber];
+        // })
+        // console.log("timeIndex action.descDataArea :%o", action.descDateArea)
+        //     if (action.descDateArea && Object.keys(action.descDateArea).length > 0) {
+        //         let dayArray = [];
+        //         const daySortArray = Object.keys(action.descDateArea).map(key => {
+        //             return key;
+        //         }).sort();
+        //         const timeNow = timeIndexInState.timeNow || daySortArray[0].substr(0, 6);
+        //         // if (state.timeNow != null) {
+        //         //     timeNow = state.timeNow;
+        //         // }
+        //         const timeDataArray = dayArrayToTimeDataArray(daySortArray);
+        //         // timeDataArray.push({ month: nextMonth, day: nextTime, dayData: dayData })
+        //         return { daySortArray, timeNow, timeDataArray };
+        //     } else {
+        //         return { daySortArray: [], timeNow: null, timeDataArray: [] };
+        //     }
+        // default:
+        //     return timeIndexInState;
     }
 }
 
@@ -168,6 +246,31 @@ function chartData(chartDataInState = {}, action) {
     }
 }
 
+//--------------顶部删选--------------------
 
-export default data
+const filterData = (filterInState = initFilter(), action) => {
+    //console.log("进入reduce-filterReduers:",action)
+    console.log("filterInState ", filterInState, action)
+    switch (action.type) {
+        case ActionTypes.FILTER.SET_START_TIME:
+            return Object.assign(filterInState, { startTime: action.startTime });
+        case ActionTypes.FILTER.SET_END_TIME:
+            return Object.assign({}, filterInState, { endTime: action.endTime });
+        case ActionTypes.FILTER.SET_USERNUMBER:
+            return Object.assign({}, filterInState, { userNumber: action.userNumber });
+        case ActionTypes.OPTION.CHANGE_CHECK:
+            const { options } = filterInState;
+            console.log("action.optValue,", action.optValue, action.optCheck)
+            options.map((item) => {
+                if (action.optValue === item.value) {
+                    item.ischeck = action.optCheck;
+                }
+            });
+            return Object.assign({}, filterInState, { options });
+        default:
+            return filterInState;
+    }
+}
+
+export default data;
 

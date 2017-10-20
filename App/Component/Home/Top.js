@@ -1,78 +1,71 @@
-import {connect} from 'react-redux'
+import { connect } from 'react-redux'
 import React from 'react';
 import * as Actions from '../../Actions/Actions';
-import Option from '../PartOption/option'
-import {Row, Col, DatePicker,Button} from 'antd';
-import moment  from 'moment';
+import { Row, Col, DatePicker, Button } from 'antd';
+import moment from 'moment';
 
-const Top = ({showTop,setStartTime,setEndTime,renderFun, optionlist, starttime, endtime}) => (
-    <Row height="40px" className="top" style={{display:showTop?'block':'none'}}>
-        <Col span="16">
-            <a href="javascript:;" className="logo">
-                <img src="images/index-logo02.png"></img>
-            </a>
-            <ul className="life-class">
-                {renderFun(optionlist)}
-            </ul>
-        </Col>
-        <Col span="8">
-            <div className={"searchAgain"}>
-                <DatePicker defaultValue={moment(starttime,'YYYY-MM-DD')} onChange={(date,dateString)=>{setStartTime(dateString)}} />
-                    -
-                <DatePicker defaultValue={moment(endtime,'YYYY-MM-DD')} onChange={(date,dateString)=>{setEndTime(dateString)}} /> 
-                <Button  icon="user" style={{backgroundColor:"#fd6461"}}>重新比对</Button>
-            </div> 
-        </Col>
-    </Row>
+
+const Option = ({ ischeck, optionClass, optionName, checkOption }) => (
+    <li className={ischeck ? optionClass + ' life-check' : optionClass} onClick={checkOption}>
+        <p href="javascript:;">
+            <i></i>
+            <span>{optionName}(未定)</span>
+        </p>
+    </li>
 )
 
 class Head extends React.Component {
-    constructor(props) {
-        super(props);
-        this.renderOptions = this.renderOptions.bind(this)//内部function绑定
-    }
-
-    renderOptions(optionlist) {
-        return optionlist.map((option, index)=> {
-            return (<Option
-                key={index}
-                id={index}
-                ischeck={option.ischeck}
-                optionName={option.optionName}
-                optionClass={option.optionClass}
-            />)
-        });
-    }
-
     render() {
         //console.log("top改变:",this.props)
-        let {topShow,filter,setStartTime,setEndTime} = this.props;
-        return (<Top
-            showTop={topShow}
-            renderFun={this.renderOptions}
-            optionlist={filter.options}
-            starttime={filter.timeAndNumber.startTime}
-            endtime={filter.timeAndNumber.endTime}
-            setStartTime={setStartTime}
-            setEndTime={setEndTime}
-        />
+        let { topShow, filterData, setStartTime, setEndTime, checkOption } = this.props;
+        const { options, startTime, endTime, } = filterData;
+        return (
+            <Row height="40px" className="top" style={{ display: topShow ? 'block' : 'none' }}>
+                <Col span="16">
+                    <a href="javascript:;" className="logo">
+                        <img src="images/index-logo02.png"></img>
+                    </a>
+                    <ul className="life-class">
+                        {
+                            options.map((option, index) => {
+                                return (
+                                    <Option
+                                        ischeck={option.ischeck}
+                                        optionName={option.optionName}
+                                        optionClass={option.optionClass}
+                                        checkOption={() => { checkOption(option.value, !option.ischeck) }}
+                                    />)
+                            })
+                        }
+                    </ul>
+                </Col>
+                <Col span="8">
+                    <div className={"searchAgain"}>
+                        <DatePicker defaultValue={moment(startTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setStartTime(dateString) }} />
+                        -
+                         <DatePicker defaultValue={moment(endTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setEndTime(dateString) }} />
+                        <Button icon="user" style={{ backgroundColor: "#fd6461" }}>重新比对</Button>
+                    </div>
+                </Col>
+            </Row>
         )
     }
 }
 function mapStateToProps(state) {
     return {
-        filter: state.filter,
-        topShow:state.ui.Top.showTop
+        filterData: state.data.filterData,
+        topShow: state.ui.Top.showTop
     }
 }
 
 function mapDispatchToProps(dispatch) {
-    return{
-        setStartTime:(date)=>{dispatch(Actions.setStartTime(date))},
-        setEndTime:(date)=>{dispatch(Actions.setEndTime(date))}
+    return {
+        setStartTime: (date) => { dispatch(Actions.setStartTime(date)); },
+        setEndTime: (date) => { dispatch(Actions.setEndTime(date)); },
+        checkOption: (optValue, optCheck) => { dispatch(Actions.checkOption(optValue, optCheck)); }
     }
 }
 
-export default connect(mapStateToProps,mapDispatchToProps
+export default connect(mapStateToProps, mapDispatchToProps
 )(Head)
 

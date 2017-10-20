@@ -3,8 +3,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { showDetail } from "../../../Actions/Actions";
 
-
-
 const cardClassName = "life-single life-day";
 
 const wbCard = (type_org, dataContent) => {

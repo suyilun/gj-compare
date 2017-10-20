@@ -1,6 +1,5 @@
-
 import {combineReducers} from 'redux';
-import filter from './Reduers_filter';
+
 import ui from './Reduer_ui';
 import data from './Reduer_data';
 
@@ -8,6 +7,5 @@ import data from './Reduer_data';
 //combinReducers是将以上方法做融合绑定
 export default combineReducers({
     data,
-    filter,
     ui,
 })

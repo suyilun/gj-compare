@@ -19,12 +19,32 @@ export function addOption(optionName, optionClass) {
         optionClass: optionClass
     };
 }
+
 //改变选项（飞机，火车）选中状态
-export function checkOption(index) {
-    return {
-        type: ActionTypes.OPTION.CHANGE_CHECK,
-        index
-    };
+export function checkOption(optValue, optCheck) {
+    return (dispatch, getState) => {
+        const { loadData } = getState().data;
+        const mappings = [];
+        Object.keys(loadData).map(userNumber => {
+            const mapping = {};
+            loadData[userNumber].content.map((item, idx) => {
+                if (optCheck) {
+                    // if(item.track_type!='hc_dp')
+                    // {
+                    //     //是否显示
+                    //     mapping[item.online_time]=idx;
+                    // }
+                }
+            });
+            mappings[userNumber] = mapping;
+        })
+        dispatch({
+            type: ActionTypes.OPTION.CHANGE_CHECK,
+            optValue,
+            optCheck,
+            mappings,
+        });
+    }
 }
 
 //设置筛选人员身份证号
@@ -60,12 +80,12 @@ export function isLoadWait(loadStatus) {
         loadStatus
     }
 }
-function mappingData(userNumber, md5Arr, dateArr) {
+function mappingData(userNumber, md5Arr, userDateMap) {
     return {
         type: ActionTypes.DATA.MAPPING,
         userNumber,
         md5Arr,
-        dateArr
+        userDateMap
     }
 }
 function descMd5Arr(md5Arr) {
@@ -116,44 +136,60 @@ export function loadData(sfzh) {
         //首次displaced：更新loadStatus 来加载进度条
         dispatch(isLoadWait(true));
         //TODO:旧请求地址/fwzy/do/track/data
+        console.log("getState()", getState())
         return axios.get(`/json/${sfzh}.json`,
             {
                 params: {
                     zjhm: sfzh,
-                    kssj: getState().filter.timeAndNumber.startTime.replace("-", "").replace("-", "") + "000000",
-                    jssj: getState().filter.timeAndNumber.endTime.replace("-", "").replace("-", "") + "999999",
-                    lx: getState().filter.options.filter((option) => { return option.ischeck }).map((option) => { return option.value }).join(','),//'wb,lg,hc,ky,fj,zk,qt,yl'
+                    kssj: getState().data.filterData.startTime.replace("-", "").replace("-", "") + "000000",
+                    jssj: getState().data.filterData.endTime.replace("-", "").replace("-", "") + "999999",
+                    lx: getState().data.filterData.getShowTypes().join(','),//'wb,lg,hc,ky,fj,zk,qt,yl'
                 }
                 , responseType: "json"
             }
-        )
-            .then(function (response) {
-                console.log("异步获得的数据", response.data);
-                let result = response.data;
-                let userNumber = result.people.userNumber;
-                let contents = result.content;
-                let md5Arr = []; let dateArr = []; let dateMap = {};
-                contents.map((content, index) => {
-                    md5Arr.push(content.hbase_zj);
-                    dateArr.push(content.online_time);
-                    dateMap[content.online_time] = index;
-                })
-                //console.log("完成数据分类：",md5Arr)
-
-                //数据映射
-                dispatch(mappingData(userNumber, md5Arr, dateMap))
-                //合并date，md5集合
-                dispatch(descMd5Arr(md5Arr))
-                dispatch(descDateArr(dateArr))
-                //每次加载后初始化时间轴
-                dispatch(initTimeIndex(getState().data.desc.date_area))
-                //数据存储
-                dispatch(AddData(userNumber, result))
-                //停止显示进度条
-                dispatch(isLoadWait(false))
-                dispatch({ type: ActionTypes.CHART.CHART_ADD_DATA, userNumber, dateArr })
-                console.log("更新后的state:", getState());
+        ).then(function (response) {
+            console.log("异步获得的数据", response.data);
+            let result = response.data;
+            let userNumber = result.people.userNumber;
+            let contents = result.content;
+            let md5Arr = []; let dateArr = []; let userDateMap = {};
+            //用户时间类型数据
+            let userTimeTypeData = { userNumber: userNumber, timeTypeData: [] };
+            contents.map((content, index) => {
+                md5Arr.push(content.hbase_zj);
+                dateArr.push(content.online_time);
+                //类型-时间-是否显示track_type,time,show
+                userTimeTypeData.timeTypeData.push({ time: content.online_time, track_type: content.track_type, show: true })
+                //index-show  序号-是否显示
+                userDateMap[content.online_time] = { index: index, show: true };
             })
+            //console.log("完成数据分类：",md5Arr)
+
+            //数据映射，加入过滤
+            dispatch(mappingData(userNumber, md5Arr, userDateMap));
+            //合并date，md5集合
+            dispatch(descMd5Arr(md5Arr))
+            dispatch(descDateArr(dateArr))
+            //每次加载后初始化时间轴
+            dispatch(
+                {
+                    type: ActionTypes.DATA.ADD_USER_TIME_INDEX,
+                    userTimeTypeData
+                }
+            );
+            //数据存储
+            dispatch(AddData(userNumber, result))
+            //停止显示进度条
+            dispatch(isLoadWait(false));
+            //图标数据
+            dispatch(
+                {
+                    type: ActionTypes.CHART.CHART_ADD_DATA,
+                    userNumber,
+                    dateArr
+                });
+            console.log("更新后的state:", getState());
+        })
             .catch(function (error) {
                 console.log(error);
             });
@@ -163,13 +199,6 @@ export function loadData(sfzh) {
 }
 
 //给次ajax后用所有的加载数据去重新初始化时间轴
-
-function initTimeIndex(descDateArea) {
-    return {
-        type: ActionTypes.DATA.INIT_TIME_INDEX,
-        descDateArea
-    }
-}
 
 
 function deleteDescMd5(md5Arr) {
@@ -223,7 +252,6 @@ export function changeShowChart(value) {
 
 //删除一个人的轨迹内容
 export function dataCancel(userNumber) {
-    console.log("正在删除")
     return function (dispatch, getState) {
         let mapping = getState().data.mappings;
         //console.log("i'll dead",mapping[userNumber].md5Arr)
@@ -234,10 +262,15 @@ export function dataCancel(userNumber) {
         dispatch(deleteMapping(userNumber))
         //删除数据
         dispatch(deleteData(userNumber))
+        dispatch(
+            {
+                type: ActionTypes.DATA.DEL_USER_TIME_INDEX,
+                userNumber
+            }
+        );
         //重新初始化时间轴
-        dispatch(initTimeIndex(getState().data.desc.date_area))
+        //dispatch(initTimeIndex(getState().data.desc.date_area))
         dispatch({ type: ActionTypes.CHART.CHART_DELETE_DATA, userNumber })
-
         console.log("更新后的state:", getState());
     }
 }

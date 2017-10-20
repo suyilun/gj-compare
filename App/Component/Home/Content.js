@@ -60,7 +60,7 @@ const PersonTaces = ({ height, mappings = {}, showDetailFunc, loadData, timeInde
     let all = [];
     for (let key in mappings) {
         all.push(<PeopleDataList
-            oneTrackDate={mappings[key].dateArr}
+            userDateMap={mappings[key].userDateMap}
             userNumber={key}
             key={key}
             loadData={loadData}
@@ -181,7 +181,6 @@ class Content extends React.Component {
             <Row>
                 <Col span="24">
                     <Handle />
-
                     <div className="index-left" style={{ height: height, overflowX: "hidden" }}>
                         <Spin tip="Loading..." spinning={ui.isLoad.isLoadStatus} >
                             <h1>对比人数：<span>{Object.keys(loadData).length}</span></h1>
@@ -216,8 +215,6 @@ class Content extends React.Component {
                             </Select> <Switch size="small" checked={ui.showChart} onChange={changeShowChart} />
                         </div>
                     </div>
-
-
                     <div className="collect">
                         <Input.Search
                             size="small"
@@ -255,8 +252,9 @@ class Content extends React.Component {
                     <div
                         className="b-right" ref="timelineRef" style={{ overflowX: "hidden" }} >
                         {ui.showChart ?
-                            (<TraceChart userChartDataMonth={userChartDataMonth} />) : (
-                                <BaseTimeLine timeIndex={timeIndex} />)
+                            (<TraceChart userChartDataMonth={userChartDataMonth} />)
+                            :
+                            (<BaseTimeLine timeIndex={timeIndex} />)
                         }
                     </div>
 
@@ -271,17 +269,12 @@ class Content extends React.Component {
 }
 
 
-
 function mapStateToProps(state) {
-
-
-
     return {
         data: state.data,
         ui: state.ui,
         isTopShow: state.ui.Top.showTop,
         isLoadStatus: state.ui.isLoad.isLoadStatus,
-        filter: state.filter,
         // showTimeIndex: (timeIndex) => {
         //    dispatch(Actions.loadTimeLine(timeIndx));
         // }
