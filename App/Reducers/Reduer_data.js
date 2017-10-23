@@ -1,16 +1,6 @@
 import ActionTypes from '../Actions/ActionTypes';
+import TraceCard from '../Component/PartOption/TraceCard'
 
-
-const initOption = [
-    { optionName: '旅馆', optionClass: 'lg-life', ischeck: true, value: 'lg' },
-    { optionName: '飞机', optionClass: 'fj-life', ischeck: true, value: 'fj' },
-    { optionName: '火车', optionClass: 'hc-life', ischeck: true, value: 'hc' },
-    { optionName: '客运', optionClass: 'ky-life', ischeck: true, value: 'ky' },
-    { optionName: '医疗', optionClass: 'yl-life', ischeck: true, value: 'yl' },
-    { optionName: '暂口', optionClass: 'zk-life', ischeck: true, value: 'zk' },
-    { optionName: '网吧', optionClass: 'wb-life', ischeck: true, value: 'wb' },
-    { optionName: '其他', optionClass: 'qt-life', ischeck: true, value: 'qt' },
-]
 
 const data = (state = {}, action) => {
     //console.log("进入reduce-data:",action)
@@ -31,7 +21,7 @@ const initFilter = () => {
         startTime: date.getFullYear() + "-01-01",
         endTime: `${date.getFullYear()}-${date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()}-${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}`,
         userNumber: '',
-        options: initOption,
+        options: TraceCard.typeOptions,
         getShowTypes: function () {
             return this.options.filter((option) => { return option.ischeck }).map((option) => { return option.value })
         }
@@ -108,6 +98,8 @@ function loadData(loadDataInState = {}, action) {
             return loadDataInState;
     }
 }
+
+
 //加载数据时做映射
 function mappings(mappingsInState = {}, action) {
     const { type, userNumber, md5Arr, userDateMap, mappings } = action;
@@ -119,14 +111,24 @@ function mappings(mappingsInState = {}, action) {
             delete mappingsInState[userNumber];
             return Object.assign({}, mappingsInState);
         case ActionTypes.OPTION.CHANGE_CHECK:
-            let newMappingsInState = {};
-            Object.keys(mappings).map(userNumberKey => {
-                newMappingsInState[userNumberKey]={userDateMap: mappings[userNumberKey]};
-                if (mappingsInState[userNumberKey]) {
-                    newMappingsInState[userNumberKey].md5Arr;
+            const { optCheck, optValue } = action;
+            Object.keys(mappingsInState).map(userNumber => {
+                const userDateMap = mappingsInState[userNumber].userDateMap;
+                if (typeof optValue != 'undefined') {
+                    // userDateMap[content.online_time] = { index: index,track_type:content.track_type ,show: true };
+                    Object.keys(userDateMap).map(time => {
+                        const userDateItemValue = userDateMap[time];
+                        if (TraceCard.isOptionType(userDateItemValue.track_type, optValue)) {
+                            if (optCheck) {
+                                userDateItemValue.show = true;
+                            } else {
+                                userDateItemValue.show = false;
+                            }
+                        }
+                    })
                 }
             })
-            return newMappingsInState;
+            return mappingsInState;
         default:
             return mappingsInState;
     }
@@ -161,16 +163,14 @@ function timeIndex(
         timeDataArray: [],
         timePos: [],
         userTimeTypeDataMap: {}
-    }
-    , action) {
-    const handlerUserTimeTypeDataMap = (userTimeTypeDataMap, showTypes) => {
-        // const types = filterData.getShowTypes();//所有需要显示的类型
+    }, action) {
+    const handlerUserTimeTypeDataMap = (userTimeTypeDataMap, optValue, optCheck) => {
         const allTimes = [];
         Object.keys(userTimeTypeDataMap).map(userNumber => {
             const timeTypeData = userTimeTypeDataMap[userNumber].timeTypeData;
             timeTypeData.map(
                 timeTypeDataItem => {
-                    if (!false) {//TODO判断是否过滤 filterData
+                    if (timeTypeDataItem.show) {
                         allTimes.push(timeTypeDataItem.time);
                     }
                 }
@@ -189,6 +189,27 @@ function timeIndex(
                 handlerUserTimeTypeDataMap(userTimeTypeDataMap));
         case ActionTypes.DATA.DEL_USER_TIME_INDEX:
             delete userTimeTypeDataMap[userNumber];
+            return Object.assign({}, timeIndexInState,
+                handlerUserTimeTypeDataMap(userTimeTypeDataMap));
+        case ActionTypes.OPTION.CHANGE_CHECK:
+            const { optValue, optCheck } = action;
+            Object.keys(userTimeTypeDataMap).map(userNumber => {
+                const timeTypeData = userTimeTypeDataMap[userNumber].timeTypeData;
+                timeTypeData.map(timeTypeDataItem => {
+                    if (TraceCard.isOptionType(timeTypeDataItem.track_type, optValue)) {
+                        if (optCheck) {
+                            //显示
+                            timeTypeDataItem.show = true;
+                        } else {
+                            //不显示
+                            timeTypeDataItem.show = false;
+                        }
+                    }
+                })
+            })
+            console.log("changeSelect ", userTimeTypeDataMap);
+
+
             return Object.assign({}, timeIndexInState,
                 handlerUserTimeTypeDataMap(userTimeTypeDataMap));
         default:

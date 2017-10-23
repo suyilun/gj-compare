@@ -15,7 +15,7 @@ import {
 import Immutable from 'immutable';
 import * as Actions from '../../Actions/Actions';
 import PeoplePic from '../PartOption/peoplePic';
-import PeopleDataList from '../PartOption/TackContent/peopleDataList';
+import PeopleTraceList from '../PartOption/PeopleTraceList';
 import OneDayIndex from '../PartOption/oneDayIndexOption';
 import DetailOption from '../PartOption/detailOption';
 import 'react-vis/dist/style.css';
@@ -59,7 +59,7 @@ const Peoples = () => { }
 const PersonTaces = ({ height, mappings = {}, showDetailFunc, loadData, timeIndex }) => {
     let all = [];
     for (let key in mappings) {
-        all.push(<PeopleDataList
+        all.push(<PeopleTraceList
             userDateMap={mappings[key].userDateMap}
             userNumber={key}
             key={key}

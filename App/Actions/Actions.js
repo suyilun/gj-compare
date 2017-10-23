@@ -1,5 +1,6 @@
 import ActionTypes from './ActionTypes'
 import { Map } from 'immutable'
+import  TraceCard from '../Component/PartOption/TraceCard'
 import axios from 'axios'
 
 
@@ -23,26 +24,10 @@ export function addOption(optionName, optionClass) {
 //改变选项（飞机，火车）选中状态
 export function checkOption(optValue, optCheck) {
     return (dispatch, getState) => {
-        const { loadData } = getState().data;
-        const mappings = [];
-        Object.keys(loadData).map(userNumber => {
-            const mapping = {};
-            loadData[userNumber].content.map((item, idx) => {
-                if (optCheck) {
-                    // if(item.track_type!='hc_dp')
-                    // {
-                    //     //是否显示
-                    //     mapping[item.online_time]=idx;
-                    // }
-                }
-            });
-            mappings[userNumber] = mapping;
-        })
         dispatch({
             type: ActionTypes.OPTION.CHANGE_CHECK,
             optValue,
-            optCheck,
-            mappings,
+            optCheck
         });
     }
 }
@@ -161,7 +146,7 @@ export function loadData(sfzh) {
                 //类型-时间-是否显示track_type,time,show
                 userTimeTypeData.timeTypeData.push({ time: content.online_time, track_type: content.track_type, show: true })
                 //index-show  序号-是否显示
-                userDateMap[content.online_time] = { index: index, show: true };
+                userDateMap[content.online_time] = { index: index,track_type:content.track_type ,show: true };
             })
             //console.log("完成数据分类：",md5Arr)
 
