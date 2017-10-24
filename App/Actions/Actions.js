@@ -1,6 +1,6 @@
 import ActionTypes from './ActionTypes'
 import { Map } from 'immutable'
-import  TraceCard from '../Component/PartOption/TraceCard'
+import TraceCard from '../Component/PartOption/TraceCard'
 import axios from 'axios'
 
 
@@ -128,7 +128,7 @@ export function loadData(sfzh) {
                     zjhm: sfzh,
                     kssj: getState().data.filterData.startTime.replace("-", "").replace("-", "") + "000000",
                     jssj: getState().data.filterData.endTime.replace("-", "").replace("-", "") + "999999",
-                    lx: getState().data.filterData.getShowTypes().join(','),//'wb,lg,hc,ky,fj,zk,qt,yl'
+                    lx: 'wb,lg,hc,ky,fj,zk,qt,yl'
                 }
                 , responseType: "json"
             }
@@ -143,10 +143,26 @@ export function loadData(sfzh) {
             contents.map((content, index) => {
                 md5Arr.push(content.hbase_zj);
                 dateArr.push(content.online_time);
+
+
+                //如果是旅馆，需要进行拆分
+                
+
+
                 //类型-时间-是否显示track_type,time,show
-                userTimeTypeData.timeTypeData.push({ time: content.online_time, track_type: content.track_type, show: true })
+                userTimeTypeData.timeTypeData.push({
+                    time: content.online_time,
+                    track_type: content.track_type,
+                    show: TraceCard.dataTypeIsShow(getState().data.filterData.options, content.track_type)
+                })
                 //index-show  序号-是否显示
-                userDateMap[content.online_time] = { index: index,track_type:content.track_type ,show: true };
+                //getState().data.filterData.getShowTypes().join(','),//
+                //const hiddenTypes=getState().data.filterData.getHiddenTypes();
+                userDateMap[content.online_time] = {
+                    index: index,
+                    track_type: content.track_type,
+                    show: TraceCard.dataTypeIsShow(getState().data.filterData.options, content.track_type)
+                };
             })
             //console.log("完成数据分类：",md5Arr)
 
@@ -184,8 +200,6 @@ export function loadData(sfzh) {
 }
 
 //给次ajax后用所有的加载数据去重新初始化时间轴
-
-
 function deleteDescMd5(md5Arr) {
     return {
         type: ActionTypes.DATA.MA5_DELETE_COLLECTOR,
@@ -217,9 +231,7 @@ function deleteData(userNumber) {
 
 export function changeChart() {
     return (dispatch, getState) => {
-
         const chartData = {}
-
         return {
             type: ActionTypes.CHART.CHART_INIT,
             chartData
@@ -239,7 +251,6 @@ export function changeShowChart(value) {
 export function dataCancel(userNumber) {
     return function (dispatch, getState) {
         let mapping = getState().data.mappings;
-        //console.log("i'll dead",mapping[userNumber].md5Arr)
         //删除desc
         dispatch(deleteDescMd5(mapping[userNumber].md5Arr))
         dispatch(deleteDescDate(mapping[userNumber].dateArr))
@@ -256,6 +267,7 @@ export function dataCancel(userNumber) {
         //重新初始化时间轴
         //dispatch(initTimeIndex(getState().data.desc.date_area))
         dispatch({ type: ActionTypes.CHART.CHART_DELETE_DATA, userNumber })
+
         console.log("更新后的state:", getState());
     }
 }
@@ -273,10 +285,6 @@ function loadDetailData(data) {
         detailData: data
     }
 }
-
-
-
-
 
 
 //加载详情
@@ -298,9 +306,7 @@ export function loadDetail() {
             .catch(function (error) {
                 console.log(error);
             });
-
     }
-
 }
 
 

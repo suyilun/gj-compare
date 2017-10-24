@@ -15,17 +15,19 @@ const data = (state = {}, action) => {
     }
 }
 
+
+
 const initFilter = () => {
     const date = new Date();
+    // optionName: '旅馆', optionClass: 'lg-life', ischeck: true, value: 'lg',
+    // dataTypes: ['lg', 'lg_zj']
     return {
         startTime: date.getFullYear() + "-01-01",
         endTime: `${date.getFullYear()}-${date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()}-${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}`,
         userNumber: '',
         options: TraceCard.typeOptions,
-        getShowTypes: function () {
-            return this.options.filter((option) => { return option.ischeck }).map((option) => { return option.value })
-        }
-    }
+    };
+
 }
 
 
@@ -59,7 +61,6 @@ function md5_area(state, action) {
         default:
             return state;
     }
-
 }
 
 function date_area(state, action) {
@@ -98,7 +99,6 @@ function loadData(loadDataInState = {}, action) {
             return loadDataInState;
     }
 }
-
 
 //加载数据时做映射
 function mappings(mappingsInState = {}, action) {
@@ -158,11 +158,7 @@ function dayArrayToTimeDataArray(dayArray) {
 //初始化时间轴
 function timeIndex(
     timeIndexInState = {
-        daySortArray: [],
-        timeNow: null,
-        timeDataArray: [],
-        timePos: [],
-        userTimeTypeDataMap: {}
+        daySortArray: [],timeNow: null,timeDataArray: [],timePos: [],userTimeTypeDataMap: {}
     }, action) {
     const handlerUserTimeTypeDataMap = (userTimeTypeDataMap, optValue, optCheck) => {
         const allTimes = [];
@@ -183,14 +179,20 @@ function timeIndex(
     const { type, userTimeTypeData, userNumber } = action
     const { userTimeTypeDataMap } = timeIndexInState
     switch (type) {
+        //新增一个用户
         case ActionTypes.DATA.ADD_USER_TIME_INDEX:
             userTimeTypeDataMap[userTimeTypeData.userNumber] = userTimeTypeData;
+
             return Object.assign({}, timeIndexInState,
                 handlerUserTimeTypeDataMap(userTimeTypeDataMap));
+        //删除一个用户
         case ActionTypes.DATA.DEL_USER_TIME_INDEX:
             delete userTimeTypeDataMap[userNumber];
+
+
             return Object.assign({}, timeIndexInState,
                 handlerUserTimeTypeDataMap(userTimeTypeDataMap));
+        //类型勾选
         case ActionTypes.OPTION.CHANGE_CHECK:
             const { optValue, optCheck } = action;
             Object.keys(userTimeTypeDataMap).map(userNumber => {
@@ -207,35 +209,11 @@ function timeIndex(
                     }
                 })
             })
-            console.log("changeSelect ", userTimeTypeDataMap);
-
-
+            
             return Object.assign({}, timeIndexInState,
                 handlerUserTimeTypeDataMap(userTimeTypeDataMap));
         default:
             return timeIndexInState;
-
-        // Object.keys(userDateTypeConfigMap).map((userNumber,index)=>{
-        //     const userDateTypeConfig=userDateTypeConfigMap[userNumber];
-        // })
-        // console.log("timeIndex action.descDataArea :%o", action.descDateArea)
-        //     if (action.descDateArea && Object.keys(action.descDateArea).length > 0) {
-        //         let dayArray = [];
-        //         const daySortArray = Object.keys(action.descDateArea).map(key => {
-        //             return key;
-        //         }).sort();
-        //         const timeNow = timeIndexInState.timeNow || daySortArray[0].substr(0, 6);
-        //         // if (state.timeNow != null) {
-        //         //     timeNow = state.timeNow;
-        //         // }
-        //         const timeDataArray = dayArrayToTimeDataArray(daySortArray);
-        //         // timeDataArray.push({ month: nextMonth, day: nextTime, dayData: dayData })
-        //         return { daySortArray, timeNow, timeDataArray };
-        //     } else {
-        //         return { daySortArray: [], timeNow: null, timeDataArray: [] };
-        //     }
-        // default:
-        //     return timeIndexInState;
     }
 }
 

@@ -43,19 +43,6 @@ const lgCard = (type_org, dataContent) => {
 }
 
 
-const hcCard = (type_org, dataContent) => {
-  return (
-    <div className={cardClassName}>
-      <h1>{dataContent.cc}</h1>
-      <ul>
-        <li><span>座位:</span><span>{dataContent.zh}</span></li>
-        <li><span>{dataContent.fcrq}</span></li>
-        <li><span>{dataContent.fz}</span><span> - </span><span>{dataContent.dz}</span></li>
-      </ul>
-      <img src={`images/life_class/${type_org}_life_big.png`}></img>
-    </div>
-  );
-}
 
 const lgZjCard = (type_org, dataContent) => {
   return (
@@ -70,6 +57,24 @@ const lgZjCard = (type_org, dataContent) => {
     </div>
   );
 }
+
+const hcCard = (type_org, dataContent) => {
+  return (
+    <div className={cardClassName}>
+      <h1>{dataContent.cc}</h1>
+      <ul>
+        <li><span>座位:</span><span>{dataContent.zh}</span></li>
+        <li><span>{dataContent.fcrq}</span></li>
+        <li><span>{dataContent.fz}</span><span> - </span><span>{dataContent.dz}</span></li>
+      </ul>
+      <img src={`images/life_class/${type_org}_life_big.png`}></img>
+    </div>
+  );
+}
+
+
+
+
 
 
 const hcDpCard = (type_org, dataContent) => {
@@ -256,7 +261,30 @@ const ylWsCard = (type_org, dataContent) => {
 }
 
 
-
+const showContent = (type, dataContent) => {
+  let type_org = type.split("_")[0];
+  switch (type) {
+    case "wb": return wbCard(type_org, dataContent);
+    case "wb_zj": return wbZjCard(type_org, dataContent);
+    case "lg": return lgCard(type_org, dataContent);
+    case "lg_zj": return lgZjCard(type_org, dataContent);
+    case "hc": return hcCard(type_org, dataContent);
+    case "hc_dp": return hcDpCard(type_org, dataContent);
+    case "hc_jz": return hcJzCard(type_org, dataContent);
+    case "ky": return kyCard(type_org, dataContent);
+    case "fj": return fjCard(type_org, dataContent);
+    case "fj_dz": return fjDzCard(type_org, dataContent);
+    case "fj_jcg": return fjJcgCard(type_org, dataContent);
+    case "fj_lg": return fjLgCard(type_org, dataContent);
+    case "zk": return zkCard(type_org, dataContent);
+    case "zk_zj": return zkZjCard(type_org, dataContent);
+    case "yl_zj": return ylZjCard(type_org, dataContent);
+    case "yl_ws": return ylWsCard(type_org, dataContent);
+    case "ck": return ckCard(type_org, dataContent);
+    case "zd": return zdCard(type_org, dataContent);
+    default: return (<div>${type_org}</div>);
+  }
+}
 
 const typeOptions = [
   {
@@ -293,31 +321,10 @@ const typeOptions = [
   },
 ]
 
-const showContent = (type, dataContent) => {
-  let type_org = type.split("_")[0];
-  switch (type) {
-    case "wb": return wbCard(type_org, dataContent);
-    case "wb_zj": return wbZjCard(type_org, dataContent);
-    case "lg": return lgCard(type_org, dataContent);
-    case "lg_zj": return lgZjCard(type_org, dataContent);
-    case "hc": return hcCard(type_org, dataContent);
-    case "hc_dp": return hcDpCard(type_org, dataContent);
-    case "hc_jz": return hcJzCard(type_org, dataContent);
-    case "ky": return kyCard(type_org, dataContent);
-    case "fj": return fjCard(type_org, dataContent);
-    case "fj_dz": return fjDzCard(type_org, dataContent);
-    case "fj_jcg": return fjJcgCard(type_org, dataContent);
-    case "fj_lg": return fjLgCard(type_org, dataContent);
-    case "zk": return zkCard(type_org, dataContent);
-    case "zk_zj": return zkZjCard(type_org, dataContent);
-    case "yl_zj": return ylZjCard(type_org, dataContent);
-    case "yl_ws": return ylWsCard(type_org, dataContent);
-    case "ck": return ckCard(type_org, dataContent);
-    case "zd": return zdCard(type_org, dataContent);
-    case "": return "";
-  }
-}
+
+
 let OptionTypeMap = {};
+
 typeOptions.map(option => {
   OptionTypeMap = Object.assign(OptionTypeMap, { [option.value]: option.dataTypes });
 });
@@ -326,4 +333,16 @@ const isOptionType = (dataType, optionType) => {
   return OptionTypeMap[optionType].indexOf(dataType) > -1
 }
 
-export default { typeOptions, showContent, isOptionType } 
+
+const dataTypeIsShow = (options, dataType) => {
+  const showConfigs = {};
+  options.map(item => {
+    item.dataTypes.map(dataType => {
+      showConfigs[dataType] = item.ischeck;
+    })
+  })
+  return showConfigs[dataType];
+}
+
+
+export default { typeOptions, showContent, isOptionType, dataTypeIsShow } 
