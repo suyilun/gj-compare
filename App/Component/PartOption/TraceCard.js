@@ -4,7 +4,7 @@ const cardClassName = "life-single life-day";
 
 const barCard = (trace) => {
   return (
-    <div  key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={cardClassName}>
       <h1>{trace.barName}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.name}</span></li>
@@ -18,7 +18,7 @@ const barCard = (trace) => {
 
 const hotelCard = (trace) => {
   return (
-    <div  key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={cardClassName}>
       <h1 title={trace.hotelName}>{trace.hotelName}</h1>
       <ul>
         <li><span>房号:</span><span>{trace.roomNo}</span>{trace.name}</li>
@@ -32,7 +32,7 @@ const hotelCard = (trace) => {
 
 const trainCard = (trace) => {
   return (
-    <div key={trace.hbaseKey}  className={cardClassName}>
+    <div key={trace.hbaseKey} className={cardClassName}>
       <h1>{trace.trainCode}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.name}</span></li>
@@ -74,7 +74,7 @@ const trainCard = (trace) => {
 
 const busCard = (trace) => {
   return (
-    <div  key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={cardClassName}>
       <h1>{trace.startstationname}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.realname}</span></li>
@@ -101,7 +101,7 @@ const flightCard = (trace) => {
   }
 
   return (
-    <div  key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={cardClassName}>
       <h1>{trace.airlineCode ? `${trace.airlineCode}${trace.flightNo}` : `${trace.flightNo}`}</h1>
       <ul>
         {liArr}
@@ -155,7 +155,7 @@ const flightCard = (trace) => {
 
 const stayCard = (trace) => {
   return (
-    <div  key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={cardClassName}>
       <h1 title={trace.stayAddress}>{trace.stayAddress}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.name}</span></li>
@@ -197,7 +197,7 @@ const hospitalCard = (trace) => {
 
 const ckCard = (trace) => {
   return (
-    <div  key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={cardClassName}>
       <h1 title={trace.ssxq_zhwz + trace.xzjd_zhwz}>{trace.ssxq_zhwz + trace.xzjd_zhwz}</h1>
       <ul>
         <li><span>{trace.jlx_zhwz}</span></li>
@@ -211,7 +211,7 @@ const ckCard = (trace) => {
 //重点人员
 const zdCard = (trace) => {
   return (
-    <div  key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={cardClassName}>
       <h1>{trace.org_name}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.xm}</span></li>
@@ -305,6 +305,18 @@ const dataTypeIsShow = (options, dataType) => {
 
 //生成相同判断key
 export function sameKeyGen(trace) {
+  const day=String(trace.traceTime).substr(0,8);
+  switch (trace.catg) {
+    case "lg":return `${day}-${trace.hotelName}-${trace.address}-${trace.roomNo}`;
+    case "fj":
+    case "wb":
+    case "hc":
+    case "yl":
+    case "zk":
+    case "qt":
+    default: console.error("类型未设置md5编码：" + trace.catg); return `${trace.hbaseKey}`;
+  }
+
   return "abc";
 }
 

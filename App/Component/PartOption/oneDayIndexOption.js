@@ -26,7 +26,6 @@ class OneDayIndex extends React.Component {
 
     render() {
         let { dayData, day } = this.props;
-        console.log("dayData is %o", dayData);
         return (
             <OneDayIndexShow day={day} dayData={dayData} />
         );
@@ -34,9 +33,4 @@ class OneDayIndex extends React.Component {
 }
 
 
-function mapStateToProps(state) {
-
-}
-
-
-export default connect(mapStateToProps)(OneDayIndex)
+export default OneDayIndex;

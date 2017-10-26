@@ -33,11 +33,12 @@ const initFilter = () => {
 
 
 //加载数据是选出相同的MD5和date
-function desc(descInState = { sameDay: {}, sameMd5: {}, date_type: { timeDataArray: [] } }, action) {
+function desc(descInState = { sameDay: {}, sameMd5: {}, date_type: { timeDataArray: [] }, sumCatg: {} }, action) {
     return {
         sameDay: sameDayFun(descInState.sameDay, action),
         sameMd5: sameMd5Fun(descInState.sameMd5, action),
-        date_type: date_type(descInState.date_type, action)
+        date_type: date_type(descInState.date_type, action),
+        sumCatg: sumCatgFun(descInState.sumCatg, action),
     };
 }
 
@@ -45,74 +46,41 @@ function sameMd5Fun(state, action) {
     const { type, sameMd5 } = action;
     switch (type) {
         case ActionTypes.DATA.MD5_COLLECTOR:
-        case ActionTypes.DATA.MA5_DELETE_COLLECTOR:
+        case ActionTypes.DATA.MD5_DELETE:
             return sameMd5;
         default: return state;
     }
-
-
-
-    // switch (action.type) {
-    //     case ActionTypes.DATA.MD5_COLLECTOR:
-    //         action.md5Arr.map((md5, index) => {
-    //             let timer = state[md5] == undefined ? 1 : state[md5].timer + 1;
-    //             state[md5] = { "timer": timer };
-    //         })
-    //         return state
-    //     case ActionTypes.DATA.MA5_DELETE_COLLECTOR:
-    //         action.md5Arr.map((md5, index) => {
-    //             let timer = state[md5] == undefined ? 0 : state[md5].timer - 1;
-    //             if (timer == 0) {
-    //                 delete state[md5];
-    //             } else {
-    //                 state[md5] = { "timer": timer };
-    //             }
-    //         })
-    //         return state;
-    //     default:
-    //         return state;
-    // }
 }
 //同日分析
-function sameDayFun(state = {}, action) {
+function sameDayFun(state, action) {
     const { type, sameDay } = action;
-    switch (action.type) {
+    switch (type) {
         case ActionTypes.DATA.DATE_COLLECTOR:
-        case ActionTypes.DATA.DATE_DELETE_COLLECTOR:
+        case ActionTypes.DATA.DATE_DELETE:
             return sameDay;
         default:
             return state;
     }
-    // const stateClone = _.cloneDeep(state);
-    // switch (action.type) {
-    //     case ActionTypes.DATA.DATE_COLLECTOR:
-    //         //添加用户
-    //         action.dateArr.map((date, index) => {
-    //             let timer = stateClone[date] == undefined ? 1 : stateClone[date].timer + 1
-    //             stateClone[date] = { "timer": timer }
-    //         })
-    //         return stateClone;
-    //     case ActionTypes.DATA.DATE_DELETE_COLLECTOR:
-    //         action.dateArr.map((item) => {
-    //             let timer = stateClone[item] == undefined ? 0 : stateClone[item].timer - 1;
-    //             if (timer == 0) {
-    //                 delete stateClone[item]
-    //             } else {
-    //                 stateClone[item] = { "timer": timer }
-    //             }
-    //         })
-    //         return stateClone
-    //     default:
-    //         return state;
-    // }
+}
+
+function sumCatgFun(state, action) {
+    const { type, sumCatg } = action;
+    switch (type) {
+        case ActionTypes.DATA.SUMCATG_COLLECTOR:
+        case ActionTypes.DATA.SUMCATG_DELETE:
+        case ActionTypes.FILTER.RADIO_CHANGE:
+            return sumCatg;
+        default:
+            return state;
+    }
 }
 
 //data_type={身份证:时间数据,timeDataArray:时间轴}
 function date_type(state, action) {
-    const { userNumber, timeTypeDataArr, timeDataArray } = action;
+    const { userNumber, userTimeTypeDataArr, timeDataArray } = action;
     switch (action.type) {
         case ActionTypes.DATA.DATE_TYPE_COLLECTOR:
-            return Object.assign(state, { [userNumber]: timeTypeDataArr }, { timeDataArray });
+            return Object.assign(state, { [userNumber]: userTimeTypeDataArr }, { timeDataArray });
         case ActionTypes.DATA.DATE_TYPE_DELETE:
             const stateClone = _.cloneDeep(state);
             delete stateClone[userNumber];
@@ -130,7 +98,7 @@ function loadData(loadDataInState = {}, action) {
         case ActionTypes.DATA.ADD_RECEIVE:
             loadDataInState[action.userNumber] = action.userData;
             return loadDataInState;//由ajax添加数据值resource
-        case ActionTypes.DATA.DATE_DELETE:
+        case ActionTypes.DATA.DATA_DELETE:
             delete loadDataInState[action.userNumber];
             return Object.assign({}, loadDataInState);
         default:
@@ -145,7 +113,6 @@ function mappings(mappingsInState = {}, action) {
         case ActionTypes.DATA.MAPPING:
             return Object.assign(mappingsInState, { [userNumber]: userDateMap });
         case ActionTypes.DATA.DELETE_MAPPING:
-            //delete mappingsInState[userNumber];
             const clone = _.cloneDeep(mappingsInState);
             delete clone[userNumber];
             return clone;
@@ -171,11 +138,7 @@ function chartData(chartDataInState = {}, action) {
     switch (action.type) {
         case ActionTypes.CHART.CHART_ADD_DATA:
             const { userDateArr, userNumber } = action;
-            console.log("chartData dateArr :", userDateArr)
-            //[{month,day,dayData:[]}]
-            //const timeDataArray = dayArrayToTimeDataArray(userDateArr.sort());
             return chartDataInState;
-        //return Object.assign({}, chartDataInState, { [userNumber]: timeDataArray });
         case ActionTypes.CHART.CHART_DELETE_DATA:
             delete chartDataInState[action.userNumber];
             return chartDataInState;
@@ -187,8 +150,6 @@ function chartData(chartDataInState = {}, action) {
 //--------------顶部删选--------------------
 
 const filterData = (filterInState = initFilter(), action) => {
-    //console.log("进入reduce-filterReduers:",action)
-    console.log("filterInState ", filterInState, action)
     switch (action.type) {
         case ActionTypes.FILTER.SET_START_TIME:
             return Object.assign(filterInState, { startTime: action.startTime });
@@ -198,7 +159,6 @@ const filterData = (filterInState = initFilter(), action) => {
             return Object.assign({}, filterInState, { userNumber: action.userNumber });
         case ActionTypes.OPTION.CHANGE_CHECK:
             const { options } = filterInState;
-            console.log("action.optValue,", action.optValue, action.optCheck)
             options.map((item) => {
                 if (action.optValue === item.value) {
                     item.ischeck = action.optCheck;

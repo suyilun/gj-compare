@@ -5,11 +5,11 @@ import { Row, Col, DatePicker, Button } from 'antd';
 import moment from 'moment';
 
 
-const Option = ({ ischeck, optionClass, optionName, checkOption }) => (
+const Option = ({ ischeck, optionClass, optionName, checkOption, sumRows }) => (
     <li className={ischeck ? optionClass + ' life-check' : optionClass} onClick={checkOption}>
         <p href="javascript:;">
             <i></i>
-            <span>{optionName}(未定)</span>
+            <span>{optionName}({sumRows})</span>
         </p>
     </li>
 )
@@ -17,7 +17,7 @@ const Option = ({ ischeck, optionClass, optionName, checkOption }) => (
 class Head extends React.Component {
     render() {
         //console.log("top改变:",this.props)
-        let { topShow, filterData, setStartTime, setEndTime, checkOption } = this.props;
+        let { topShow, filterData, sumCatg, setStartTime, setEndTime, checkOption } = this.props;
         const { options, startTime, endTime, } = filterData;
         return (
             <Row height="40px" className="top" style={{ display: topShow ? 'block' : 'none' }}>
@@ -33,6 +33,7 @@ class Head extends React.Component {
                                         ischeck={option.ischeck}
                                         optionName={option.optionName}
                                         optionClass={option.optionClass}
+                                        sumRows={sumCatg[option.value] ? sumCatg[option.value] : 0}
                                         checkOption={() => { checkOption(option.value, !option.ischeck) }}
                                     />)
                             })
@@ -53,6 +54,7 @@ class Head extends React.Component {
 }
 function mapStateToProps(state) {
     return {
+        sumCatg: state.data.desc.sumCatg,
         filterData: state.data.filterData,
         topShow: state.ui.Top.showTop
     }

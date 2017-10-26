@@ -38,10 +38,7 @@ const DATA2 = [
     { x: 'b', y: 2 },
     { x: 'c', y: 1 },
     { x: 'd', y: 2 },
-
 ]
-
-console.log(" draw DATA ", DATA)
 
 const TimeLine = ({ timeDataArray }) => {
     console.log("timeDataArray is %o", timeDataArray)
