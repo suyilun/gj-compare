@@ -3,7 +3,6 @@ import { Map } from 'immutable'
 import TraceCard from '../Component/PartOption/TraceCard'
 import axios from 'axios'
 
-
 /*以下为 Top 内容*/
 //UI是否显示Top
 export function showTop(isShow) {
@@ -24,21 +23,24 @@ export function addOption(optionName, optionClass) {
 //改变选项（飞机，火车）选中状态
 export function checkOption(optValue, optCheck) {
     return (dispatch, getState) => {
+        const radioValue = getState().data.filterData.radioValue;
+        const timeDataArray = calculteTimeDataArrayByChangeOptionAndRadio(getState, optValue, optCheck, radioValue);
         dispatch({
             type: ActionTypes.OPTION.CHANGE_CHECK,
             optValue,
-            optCheck
+            optCheck,
+            timeDataArray
         });
     }
 }
 
-//设置筛选人员身份证号
-export function setUserNumber(userNumber) {
-    return {
-        type: ActionTypes.FILTER.SET_USERNUMBER,
-        userNumber
-    };
-}
+// //设置筛选人员身份证号
+// export function setUserNumber(userNumber) {
+//     return {
+//         type: ActionTypes.FILTER.SET_USERNUMBER,
+//         userNumber
+//     };
+// }
 
 //设置筛选结束日期
 export function setEndTime(endTime) {
@@ -65,11 +67,10 @@ export function isLoadWait(loadStatus) {
         loadStatus
     }
 }
-function mappingData(userNumber, md5Arr, userDateMap) {
+function mappingData(userNumber, userDateMap) {
     return {
         type: ActionTypes.DATA.MAPPING,
         userNumber,
-        md5Arr,
         userDateMap
     }
 }
@@ -79,18 +80,205 @@ function descMd5Arr(md5Arr) {
         md5Arr
     }
 }
-function descDateArr(dateArr) {
+function descSameDay(getState, userTimeTypeDataArr) {
+    const sameDay = calculteSameDay(getState, userTimeTypeDataArr);
     return {
         type: ActionTypes.DATA.DATE_COLLECTOR,
-        dateArr
+        sameDay
     }
 }
 
-function AddData(userNumber, content) {
+function timeArrayToTimeDataArray(allTimes) {
+    const daySortArray = allTimes.sort();
+    let nextTime; let nextMonth; let dayData = [];
+    const timeDataArray = [];
+    daySortArray.map((time, index) => {
+        time = String(time);
+        // console.log(index,time);
+        if (nextTime == undefined || nextTime.substr(0, 8) != time.substr(0, 8)) { //判断是不是新的一天或最后一天
+            // let dayData = oneDay;
+            nextTime = time.substr(0, 8);
+            nextMonth = time.substr(0, 6);
+            dayData = [];
+            timeDataArray.push({ month: nextMonth, day: nextTime, dayData: dayData })
+        }
+        //过滤type
+        dayData.push(time);
+    })
+    return timeDataArray;
+}
+
+//栏目过滤选中,radio切换
+const calculteTimeDataArrayByChangeOptionAndRadio = (getState, optValue, optCheck, radioValue) => {
+    const dateType = getState().data.desc.date_type;
+    const sameMd5 = getState().data.desc.sameMd5;//{md5{timer:1}}对象
+    const sameDay = getState().data.desc.sameDay;//{day:{timer:1}}对象
+
+    const filterData = getState().data.filterData;
+    const allTimes = [];
+    const showTypes = filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value });
+    if (optCheck) {
+        showTypes.push(optValue);
+    } else {
+        _.remove(showTypes, function (n) {
+            return n == optValue;
+        })
+    }
+    Object.keys(dateType).map(userNumberKey => {
+        if (userNumberKey != 'timeDataArray') {
+            const timeTypeDataArrInState = dateType[userNumberKey];
+            timeTypeDataArrInState.map(
+                timeTypeData => {
+                    //没有过滤操作
+                    if (showTypes.indexOf(timeTypeData.catg) != -1) {
+                        if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5)) {
+                            allTimes.push(timeTypeData.time);
+                        }
+                    }
+                }
+            )
+        }
+    });
+    return timeArrayToTimeDataArray(allTimes);
+
+}
+
+const filterByRadio = (radioValue, dayValue, md5Value, sameDay, sameMd5) => {
+    switch (radioValue) {
+        case "all": return true;
+        case "sameDay":
+            var result = sameDay[dayValue] > 1 ? true : false
+            return result;
+        case "same": return sameMd5[md5Value] > 1 ? true : false;
+        default: console.error("radio值有错误", radioValue);
+    }
+}
+
+//用户添加删除
+// optValue, optCheck
+// optValue, optCheck, radioValue
+const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDataArr, isDeleteUser = false) => {
+
+    const dataType = getState().data.desc.date_type;
+    const filterData = getState().data.filterData;
+    const radioValue = filterData.radioValue;
+    //加入 radioValue属性
+    const showTypes = filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value });
+    //重新计算sameDay
+    const sameDay = calculteSameDay(getState, userTimeTypeDataArr, isDeleteUser);
+    const sameMd5 = calculteSameMd5(getState, userTimeTypeDataArr, isDeleteUser);
+
+    const allTimeTypeData = []
+
+    Object.keys(dataType).map(userNumberKey => {
+        if (userNumber != userNumberKey && dataType != 'timeDataArray') {
+            const userTimeTypeDataArrInState = dataType[userNumberKey];
+            userTimeTypeDataArrInState.map(
+                timeTypeData => {
+                    //没有过滤操作
+                    if (showTypes.indexOf(timeTypeData.catg) != -1) {
+                        allTimeTypeData.push(timeTypeData)
+                        // if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5)) {
+                        //     allTimes.push(timeTypeData.time);
+                        // }
+                    }
+                }
+            )
+        }
+        //{time,catg,show,sameKey}
+    });
+
+    userTimeTypeDataArr.map(timeTypeData => {
+        if (showTypes.indexOf(timeTypeData.catg) != -1) {
+            //if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5)) {
+            allTimeTypeData.push(timeTypeData);
+            //}
+        }
+    });
+
+    const allTimes = allTimeTypeData.filter((timeTypeData) => {
+        return (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5));
+    }).map((itemTypeData) => {
+        return itemTypeData.time;
+    })
+
+    return timeArrayToTimeDataArray(allTimes);
+}
+
+
+//计算同一天
+const calculteSameDay = (getState, userTimeTypeDataArr, isDeleteUser = false) => {
+    const sameDay = _.cloneDeep(getState().data.desc.sameDay);
+    const allDays = Object.keys(sameDay);
+    let dayMap = {};
+    if (!isDeleteUser) {
+        //新增用户
+        userTimeTypeDataArr.map(timeTypeData => {
+            //按照天统计
+            if (!dayMap[timeTypeData.day]) {
+                if (allDays.indexOf(timeTypeData.day) != -1) {
+                    //有数据
+                    sameDay[timeTypeData.day] = sameDay[timeTypeData.day] + 1;
+                } else {
+                    //无数据
+                    sameDay[timeTypeData.day] = 1
+                }
+            }
+        });
+    } else {
+        //删除用户时
+        userTimeTypeDataArr.map(timeTypeData => {
+            if (!dayMap[timeTypeData.day]) {
+                if (allDays.indexOf(timeTypeData.day) != -1) {
+                    if (sameDay[timeTypeData.day] == 1) {
+                        delete sameDay[timeTypeData.day];
+                    } else {
+                        sameDay[timeTypeData.day] = sameDay[timeTypeData.day] - 1;
+                    }
+                } else {
+                    console.err("state.desc.sameDay中不存在" + timeTypeData.day + "数据");
+                }
+            }
+        })
+    }
+
+    return sameDay;
+}
+
+//计算统一个md5
+const calculteSameMd5 = (getState, timeTypeDataArr, isDeleteUser = false) => {
+    const sameMd5 = _.cloneDeep(getState().data.desc.sameMd5);
+    return sameMd5;
+}
+
+
+
+function descDateTypeArr(getState, userNumber, timeTypeDataArr) {
+    const timeDataArray = calculteTimeDataArrayByUserChange(getState, userNumber, timeTypeDataArr);
+    return {
+        type: ActionTypes.DATA.DATE_TYPE_COLLECTOR,
+        userNumber,
+        timeTypeDataArr,
+        timeDataArray,
+    }
+}
+
+function deleteDesDateType(getState, userNumber) {
+    const timeDataArray = calculteTimeDataArrayByUserChange(getState, userNumber, [], true);
+    return {
+        type: ActionTypes.DATA.DATE_TYPE_DELETE,
+        userNumber,
+        timeDataArray,
+    }
+}
+
+
+
+function AddData(userNumber, userData) {
     return {
         type: ActionTypes.DATA.ADD_RECEIVE,
         userNumber,
-        content
+        userData
     }
 }
 
@@ -102,6 +290,7 @@ function iscontain(sfzh, mappings) {
     }
     return false;
 }
+
 
 //加载一个人的数据
 //thunk action 创建函数
@@ -134,61 +323,60 @@ export function loadData(sfzh) {
             }
         ).then(function (response) {
             console.log("异步获得的数据", response.data);
-            let result = response.data;
-            let userNumber = result.people.userNumber;
-            let contents = result.content;
-            let md5Arr = []; let dateArr = []; let userDateMap = {};
+            const radioValue = getState().data.filterData.radioValue;
+            let userData = response.data;
+            let userNumber = userData.people.userNumber;
+            let userTraces = userData.content;
+            let userMd5Arr = []; let userDateMap = {}; let userTimeTypeDataArr = [];
+            //let userDateArr = [];
             //用户时间类型数据
-            let userTimeTypeData = { userNumber: userNumber, timeTypeData: [] };
-            contents.map((content, index) => {
-                md5Arr.push(content.hbase_zj);
-                dateArr.push(content.online_time);
 
-
+            //let userTimeTypeData = { userNumber: userNumber, timeTypeData: [] };
+            userTraces.map((trace, index) => {
+                //userDateArr.push(trace.traceTime);
                 //如果是旅馆，需要进行拆分
-                
-
-
-                //类型-时间-是否显示track_type,time,show
-                userTimeTypeData.timeTypeData.push({
-                    time: content.online_time,
-                    track_type: content.track_type,
-                    show: TraceCard.dataTypeIsShow(getState().data.filterData.options, content.track_type)
+                userMd5Arr.push(TraceCard.sameKeyGen(trace));
+                userDateMap[trace.traceTime] = {
+                    index: index,
+                };
+                //类型-时间-是否显示catg,time,show,sameKey,key判断是是否相同值
+                userTimeTypeDataArr.push({
+                    time: trace.traceTime,
+                    day: String(trace.traceTime).substr(0, 8),
+                    catg: trace.catg,
+                    md5: TraceCard.sameKeyGen(trace),
                 })
                 //index-show  序号-是否显示
                 //getState().data.filterData.getShowTypes().join(','),//
                 //const hiddenTypes=getState().data.filterData.getHiddenTypes();
-                userDateMap[content.online_time] = {
-                    index: index,
-                    track_type: content.track_type,
-                    show: TraceCard.dataTypeIsShow(getState().data.filterData.options, content.track_type)
-                };
+                //traceTime索引位置
             })
+            //const userTimeLineData = getState().data.desc.date_type.userTimeLineData;
             //console.log("完成数据分类：",md5Arr)
-
+            //时间轴
+            dispatch(descDateTypeArr(getState, userNumber, userTimeTypeDataArr));
             //数据映射，加入过滤
-            dispatch(mappingData(userNumber, md5Arr, userDateMap));
+            dispatch(mappingData(userNumber, userDateMap));
             //合并date，md5集合
-            dispatch(descMd5Arr(md5Arr))
-            dispatch(descDateArr(dateArr))
-            //每次加载后初始化时间轴
-            dispatch(
-                {
-                    type: ActionTypes.DATA.ADD_USER_TIME_INDEX,
-                    userTimeTypeData
-                }
-            );
+            dispatch(descMd5Arr(userMd5Arr));
+            dispatch(descSameDay(getState, userTimeTypeDataArr));
+
             //数据存储
-            dispatch(AddData(userNumber, result))
+            dispatch(AddData(userNumber, userData))
+            //每次加载后初始化时间轴
+            // dispatch(
+            //     addUserTimeIndex(getState, userTimeLineData, userNumber, timeTypeDataArr, userDateArr, userMd5Arr, radioValue)
+            // );
             //停止显示进度条
-            dispatch(isLoadWait(false));
+
             //图标数据
-            dispatch(
-                {
-                    type: ActionTypes.CHART.CHART_ADD_DATA,
-                    userNumber,
-                    dateArr
-                });
+            // dispatch(
+            //     {
+            //         type: ActionTypes.CHART.CHART_ADD_DATA,
+            //         userNumber,
+            //         userDateArr
+            //     });
+            dispatch(isLoadWait(false));
             console.log("更新后的state:", getState());
         })
             .catch(function (error) {
@@ -250,24 +438,34 @@ export function changeShowChart(value) {
 //删除一个人的轨迹内容
 export function dataCancel(userNumber) {
     return function (dispatch, getState) {
-        let mapping = getState().data.mappings;
+        const date_type = getState().data.desc.date_type;
+        const md5Arr = date_type[userNumber].map((item) => { return item.md5 });
+        const dateArr = date_type[userNumber].map((item) => { return item.time });
+        //let mapping = getState().data.mappings;
         //删除desc
-        dispatch(deleteDescMd5(mapping[userNumber].md5Arr))
-        dispatch(deleteDescDate(mapping[userNumber].dateArr))
+        //md5 构建
+        //dateArray 构建
+
+        dispatch(deleteDescMd5(md5Arr));
+        dispatch(deleteDescDate(dateArr));
+        dispatch(deleteDesDateType(getState, userNumber));
+
         //删除mapping
         dispatch(deleteMapping(userNumber))
         //删除数据
         dispatch(deleteData(userNumber))
-        dispatch(
-            {
-                type: ActionTypes.DATA.DEL_USER_TIME_INDEX,
-                userNumber
-            }
-        );
+
+
+        // dispatch(
+        //     {
+        //         type: ActionTypes.DATA.DEL_USER_TIME_INDEX,
+        //         userNumber,
+        //         radioValue,
+        //     }
+        // );
         //重新初始化时间轴
         //dispatch(initTimeIndex(getState().data.desc.date_area))
         dispatch({ type: ActionTypes.CHART.CHART_DELETE_DATA, userNumber })
-
         console.log("更新后的state:", getState());
     }
 }
@@ -309,6 +507,19 @@ export function loadDetail() {
     }
 }
 
+
+export function changeSameRadio(radioValue) {
+    return (dispatch, getState) => {
+        dispatch(isLoadWait(true));
+        const timeDataArray = calculteTimeDataArrayByChangeOptionAndRadio(getState, undefined, undefined, radioValue);
+        dispatch(isLoadWait(false));
+        return dispatch({
+            type: ActionTypes.FILTER.RADIO_CHANGE,
+            radioValue,
+            timeDataArray,
+        })
+    }
+}
 
 
 

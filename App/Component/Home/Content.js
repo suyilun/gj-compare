@@ -56,17 +56,16 @@ const TimeLine = ({ timeDataArray }) => {
 
 const Peoples = () => { }
 
-const PersonTaces = ({ height, mappings = {}, showDetailFunc, loadData, timeIndex }) => {
+const PersonTaces = ({ showDetailFunc, data }) => {
     let all = [];
-    for (let key in mappings) {
-        all.push(<PeopleTraceList
-            userDateMap={mappings[key].userDateMap}
-            userNumber={key}
-            key={key}
-            loadData={loadData}
-            showDetailFunc={showDetailFunc}
-            timeIndex={timeIndex}
-        />)
+    for (let userNumber in data.loadData) {
+        all.push(
+            <PeopleTraceList
+                userNumber={userNumber}
+                key={userNumber}
+                data={data}
+                showDetailFunc={showDetailFunc}
+            />)
     }
     return (
         <div>
@@ -140,17 +139,20 @@ const TraceChart = ({ userChartDataMonth }) => (
     </XYPlot>
 );
 
-const BaseTimeLine = ({ timeIndex }) => (
-    <div className="life-time-contant max-content">
-        {timeIndex.timeDataArray.map((timeData => {
-            return (<OneDayIndex day={timeData.day} dayData={timeData.dayData} />)
-        }))}
-        <div className="life-today life-end">
-            <p className="today-time life-radius">End</p>
-        </div>
-    </div>
-);
-
+const BaseTimeLine = ({ data }) => {
+    const { desc } = data;
+    const timeTokens = [];
+    desc.date_type.timeDataArray.map((timeData => {
+        timeTokens.push(<OneDayIndex day={timeData.day} dayData={timeData.dayData} />);
+    }))
+    return (
+        <div className="life-time-contant max-content">
+            {timeTokens}
+            <div className="life-today life-end">
+                <p className="today-time life-radius">End</p>
+            </div>
+        </div>);
+};
 
 class Content extends React.Component {
     componentDidMount() {
@@ -158,13 +160,12 @@ class Content extends React.Component {
             this.refs.personTraceRef.scrollTop = this.refs.personsRef.scrollTop;
         });
         this.refs.personTraceRef.addEventListener('scroll', () => {
-            console.log("personTraceRef  滚动---------%o", this.refs.personTraceRef.scrollLeft);
             this.refs.timelineRef.scrollLeft = this.refs.personTraceRef.scrollLeft;
         });
     }
 
     render() {
-        let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart } = this.props;
+        let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart, changeSameRadioFunc } = this.props;
         console.log("content改变：", this.props);
         //height:计算content的高度
         //console.log("是否显示Top",isTopShow);
@@ -175,7 +176,7 @@ class Content extends React.Component {
             height = document.body.clientHeight - 85 - 60;
         }
 
-        const { loadData, chartData, timeIndex } = data;
+        const { loadData, chartData } = data;
         const userChartDataMonth = chartDataByMonth(chartData);
         return (
             <Row>
@@ -201,16 +202,18 @@ class Content extends React.Component {
                         <div style={{ marginTop: 21 }}>
                             <Select
                                 size="small"
-                                value={timeIndex.timeNow}
+                                value={"11"}
                                 style={{ width: "75px" }}>
                                 {
-                                    data.timeIndex.timeDataArray.map(
-                                        (timeData) => {
-                                            return (
-                                                <Option value={timeData.month}>{timeData.month}</Option>
-                                            )
-                                        }
-                                    )
+                                    //日期
+
+                                    // data.timeIndex.timeDataArray.map(
+                                    //     (timeData) => {
+                                    //         return (
+                                    //             <Option value={timeData.month}>{timeData.month}</Option>
+                                    //         )
+                                    //     }
+                                    // )
                                 }
                             </Select> <Switch size="small" checked={ui.showChart} onChange={changeShowChart} />
                         </div>
@@ -222,10 +225,10 @@ class Content extends React.Component {
                             style={{ width: 200, margin: "0px 10px 0px 10px " }}
                             onSearch={(value) => { if (!ui.isLoad.isLoadStatus) { addUser(value) } }}
                         />
-                        <Radio.Group value={'all'}>
+                        <Radio.Group value={data.filterData.radioValue} onChange={changeSameRadioFunc}>
                             <Radio value={"all"}><b className="all">所有</b></Radio>
-                            <Radio value={"same"}><b className="same">相同</b></Radio>
                             <Radio value={"sameDay"}><b className="sameDay">同日</b></Radio>
+                            <Radio value={"same"}><b className="same">相同</b></Radio>
                         </Radio.Group>
                     </div>
 
@@ -240,11 +243,9 @@ class Content extends React.Component {
                                     overflowY: "hidden"
                                 }}>
                                 <PersonTaces
-                                    mappings={data.mappings}
+                                    data={data}
                                     height={height}
                                     showDetailFunc={showDetailFunc}
-                                    loadData={loadData}
-                                    timeIndex={timeIndex}
                                 />
                             </div>
                         </Spin>
@@ -254,10 +255,9 @@ class Content extends React.Component {
                         {ui.showChart ?
                             (<TraceChart userChartDataMonth={userChartDataMonth} />)
                             :
-                            (<BaseTimeLine timeIndex={timeIndex} />)
+                            (<BaseTimeLine data={data} />)
                         }
                     </div>
-
                     <DetailOption />
                 </Col>
             </Row>
@@ -290,6 +290,9 @@ function mapDispatchToProps(dispatch) {
         },
         showDetailFunc: () => {
             dispatch(Actions.loadDetail())
+        },
+        changeSameRadioFunc: (e) => {
+            dispatch(Actions.changeSameRadio(e.target.value))
         }
     }
 }
