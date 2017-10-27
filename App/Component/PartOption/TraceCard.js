@@ -1,10 +1,9 @@
 
 
-const cardClassName = "life-single life-day";
 
-const barCard = (trace) => {
+const barCard = (trace,traceStyle) => {
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1>{trace.barName}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.name}</span></li>
@@ -16,12 +15,12 @@ const barCard = (trace) => {
   );
 }
 
-const hotelCard = (trace) => {
+const hotelCard = (trace,traceStyle) => {
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1 title={trace.hotelName}>{trace.hotelName}</h1>
       <ul>
-        <li><span>房号:</span><span>{trace.roomNo}</span>{trace.name}</li>
+        <li><span>房号:</span><span>{trace.roomNo}</span></li>
         <li><span>{trace.inTime}</span></li>
         <li><span>{trace.outTime}</span></li>
       </ul>
@@ -30,9 +29,9 @@ const hotelCard = (trace) => {
   );
 }
 
-const trainCard = (trace) => {
+const trainCard = (trace,traceStyle) => {
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1>{trace.trainCode}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.name}</span></li>
@@ -72,9 +71,9 @@ const trainCard = (trace) => {
 //   )
 // }
 
-const busCard = (trace) => {
+const busCard = (trace,traceStyle) => {
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1>{trace.startstationname}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.realname}</span></li>
@@ -86,7 +85,7 @@ const busCard = (trace) => {
   );
 }
 
-const flightCard = (trace) => {
+const flightCard = (trace,traceStyle) => {
   const liArr = [];
   liArr.push(<li>{trace.seatNo ? (<span>座位:{trace.seatNo}</span>) : null}</li>);
   if (trace.takeOffDay || trace.arriveDay) {
@@ -101,7 +100,7 @@ const flightCard = (trace) => {
   }
 
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1>{trace.airlineCode ? `${trace.airlineCode}${trace.flightNo}` : `${trace.flightNo}`}</h1>
       <ul>
         {liArr}
@@ -153,9 +152,9 @@ const flightCard = (trace) => {
 //   );
 // }
 
-const stayCard = (trace) => {
+const stayCard = (trace,traceStyle) => {
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1 title={trace.stayAddress}>{trace.stayAddress}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.name}</span></li>
@@ -182,9 +181,9 @@ const stayCard = (trace) => {
 // }
 
 
-const hospitalCard = (trace) => {
+const hospitalCard = (trace,traceStyle) => {
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1>{trace.hospital}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.name}</span></li>
@@ -195,9 +194,9 @@ const hospitalCard = (trace) => {
   );
 }
 
-const ckCard = (trace) => {
+const ckCard = (trace,traceStyle) => {
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1 title={trace.ssxq_zhwz + trace.xzjd_zhwz}>{trace.ssxq_zhwz + trace.xzjd_zhwz}</h1>
       <ul>
         <li><span>{trace.jlx_zhwz}</span></li>
@@ -209,9 +208,9 @@ const ckCard = (trace) => {
   );
 }
 //重点人员
-const zdCard = (trace) => {
+const zdCard = (trace,traceStyle) => {
   return (
-    <div key={trace.hbaseKey} className={cardClassName}>
+    <div key={trace.hbaseKey} className={traceStyle}>
       <h1>{trace.org_name}</h1>
       <ul>
         <li><span>姓名:</span><span>{trace.xm}</span></li>
@@ -225,26 +224,26 @@ const zdCard = (trace) => {
 
 
 
-const showContent = (trace) => {
+const showContent = (trace,traceStyle) => {
   switch (trace.catg) {
-    case "wb": return barCard(trace);
+    case "wb": return barCard(trace,traceStyle);
     //case "wb_zj": return wbZjCard(trace);
-    case "lg": return hotelCard(trace);
+    case "lg": return hotelCard(trace,traceStyle);
     // case "lg_zj": return lgZjCard(trace);
-    case "hc": return trainCard(trace);
+    case "hc": return trainCard(trace,traceStyle);
     //case "hc_dp": return hcDpCard(trace);
     // case "hc_jz": return hcJzCard(trace);
-    case "ky": return busCard(trace);
-    case "fj": return flightCard(trace);
+    case "ky": return busCard(trace,traceStyle);
+    case "fj": return flightCard(trace,traceStyle);
     //case "fj_dz": return fjDzCard(trace);
     //case "fj_jcg": return fjJcgCard(trace);
     //case "fj_lg": return fjLgCard(trace);
-    case "zk": return stayCard(trace);//暂住
+    case "zk": return stayCard(trace,traceStyle);//暂住
     //case "zk_zj": return zkZjCard(trace);
-    case "yl": return hospitalCard(trace);
+    case "yl": return hospitalCard(trace,traceStyle);
     //case "yl_ws": return ylWsCard(trace);
-    case "ck": return ckCard(trace);
-    case "zd": return zdCard(trace);
+    case "ck": return ckCard(trace,traceStyle);
+    case "zd": return zdCard(trace,traceStyle);
     default: return (<div>${trace.catg}</div>);
   }
 }
@@ -252,35 +251,27 @@ const showContent = (trace) => {
 const typeOptions = [
   {
     optionName: '旅馆', optionClass: 'lg-life', ischeck: true, value: 'lg',
-
   },
   {
     optionName: '飞机', optionClass: 'fj-life', ischeck: true, value: 'fj',
-
   },
   {
     optionName: '火车', optionClass: 'hc-life', ischeck: true, value: 'hc',
-
   },
   {
     optionName: '客运', optionClass: 'ky-life', ischeck: true, value: 'ky',
-
   },
   {
     optionName: '医疗', optionClass: 'yl-life', ischeck: true, value: 'yl',
-
   },
   {
     optionName: '暂口', optionClass: 'zk-life', ischeck: true, value: 'zk',
-
   },
   {
     optionName: '网吧', optionClass: 'wb-life', ischeck: true, value: 'wb',
-
   },
   {
     optionName: '其他', optionClass: 'qt-life', ischeck: true, value: 'qt',
-
   },
 ]
 
@@ -305,9 +296,9 @@ const dataTypeIsShow = (options, dataType) => {
 
 //生成相同判断key
 export function sameKeyGen(trace) {
-  const day=String(trace.traceTime).substr(0,8);
+  const day = String(trace.traceTime).substr(0, 8);
   switch (trace.catg) {
-    case "lg":return `${day}-${trace.hotelName}-${trace.address}-${trace.roomNo}`;
+    case "lg": return `${day}-${trace.hotelName}-${trace.address}-${trace.roomNo}`;
     case "fj":
     case "wb":
     case "hc":

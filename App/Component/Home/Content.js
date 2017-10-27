@@ -2,6 +2,7 @@ import { connect } from 'react-redux'
 import React from 'react';
 import Handle from '../PartOption/handle'
 import { Spin, Row, Col, Input, Radio, Select, Icon, Button, Switch } from 'antd';
+import classNames from 'classnames/bind';
 import {
     XYPlot,
     XAxis,
@@ -41,7 +42,6 @@ const DATA2 = [
 ]
 
 const TimeLine = ({ timeDataArray }) => {
-    console.log("timeDataArray is %o", timeDataArray)
     return (
         <div>
             {timeDataArray.map((timeData => {
@@ -55,14 +55,17 @@ const Peoples = () => { }
 
 const PersonTaces = ({ showDetailFunc, data }) => {
     let all = [];
+    let count = 0;
     for (let userNumber in data.loadData) {
         all.push(
             <PeopleTraceList
+                classNameExt={classNames({ "odd": count % 2 != 0, "even": count % 2 == 0 })}
                 userNumber={userNumber}
                 key={userNumber}
                 data={data}
                 showDetailFunc={showDetailFunc}
             />)
+        count++;
     }
     return (
         <div>
@@ -70,23 +73,6 @@ const PersonTaces = ({ showDetailFunc, data }) => {
         </div>
     );
 }
-
-
-// function mapStateToProps(state) {
-//     return {
-//         timeIndex: state.data.timeIndex,
-//         loadData: state.data.loadData,
-//     }
-// }
-
-// function mapDispatchToProps(dispatch) {
-//     return {
-//         showDetailFunc: () => {
-//             dispatch(Actions.loadDetail())
-//         }
-//     }
-// }
-
 
 const chartDataByMonth = (chartData) => {
     let min = 0, max = 0;
@@ -136,11 +122,10 @@ const TraceChart = ({ userChartDataMonth }) => (
     </XYPlot>
 );
 
-const BaseTimeLine = ({ data }) => {
-    const { desc } = data;
+const BaseTimeLine = ({ timeDataArray, sameDay, sameMd5 }) => {
     const timeTokens = [];
-    desc.date_type.timeDataArray.map((timeData => {
-        timeTokens.push(<OneDayIndex day={timeData.day} dayData={timeData.dayData} />);
+    timeDataArray.map((timeData => {
+        timeTokens.push(<OneDayIndex day={timeData.day} dayData={timeData.dayData} sameDay={sameDay} sameMd5={sameMd5} />);
     }))
     return (
         <div className="life-time-contant max-content">
@@ -162,7 +147,7 @@ class Content extends React.Component {
     }
 
     render() {
-        let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart, changeSameRadioFunc } = this.props;
+        let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart, changeSameRadioFunc, changeTimeSelect } = this.props;
         console.log("content改变：", this.props);
         //height:计算content的高度
         //console.log("是否显示Top",isTopShow);
@@ -174,7 +159,17 @@ class Content extends React.Component {
         }
 
         const { loadData, chartData } = data;
+        const timeDataArray = data.desc.date_type.timeDataArray;
+        const sameDay = data.desc.sameDay;
+        const sameMd5 = data.desc.sameMd5;
         const userChartDataMonth = chartDataByMonth(chartData);
+        let timeChoose = data.filterData.timeChoose;
+        if (timeChoose == null) {
+            if (timeDataArray.length > 0) {
+                timeChoose = timeDataArray[0].month;
+            }
+        }
+
         return (
             <Row>
                 <Col span="24">
@@ -199,20 +194,21 @@ class Content extends React.Component {
                         <div style={{ marginTop: 21 }}>
                             <Select
                                 size="small"
-                                value={"11"}
+                                value={timeChoose}
+                                onChange={changeTimeSelect}
                                 style={{ width: "75px" }}>
                                 {
                                     //日期
-
-                                    // data.timeIndex.timeDataArray.map(
-                                    //     (timeData) => {
-                                    //         return (
-                                    //             <Option value={timeData.month}>{timeData.month}</Option>
-                                    //         )
-                                    //     }
-                                    // )
+                                    timeDataArray.map(
+                                        (timeData) => {
+                                            return (
+                                                <Option value={timeData.month}>{timeData.month}</Option>
+                                            )
+                                        }
+                                    )
                                 }
-                            </Select> <Switch size="small" checked={ui.showChart} onChange={changeShowChart} />
+                            </Select>
+
                         </div>
                     </div>
                     <div className="collect">
@@ -252,7 +248,7 @@ class Content extends React.Component {
                         {ui.showChart ?
                             (<TraceChart userChartDataMonth={userChartDataMonth} />)
                             :
-                            (<BaseTimeLine data={data} />)
+                            (<BaseTimeLine timeDataArray={timeDataArray} sameDay={sameDay} sameMd5={sameMd5} />)
                         }
                     </div>
                     <DetailOption />
@@ -283,7 +279,10 @@ function mapDispatchToProps(dispatch) {
             dispatch(Actions.loadData(value));
         },
         changeShowChart: (value) => {
-            dispatch(Actions.changeShowChart(value))
+            dispatch(Actions.changeShowChart(value));
+        },
+        changeTimeSelect: (value) => {
+            dispatch(Actions.changeTimeSelect(value));
         },
         showDetailFunc: () => {
             dispatch(Actions.loadDetail())
@@ -293,6 +292,8 @@ function mapDispatchToProps(dispatch) {
         }
     }
 }
+
+//<Switch size="small" checked={ui.showChart} onChange={changeShowChart} />
 export default connect(mapStateToProps, mapDispatchToProps
 )(Content)
 

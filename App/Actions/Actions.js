@@ -433,12 +433,15 @@ export function loadData(sfzh) {
                 userDateMap[trace.traceTime] = {
                     index: index,
                 };
+                if(!trace.md5){
+                    trace.md5=TraceCard.sameKeyGen(trace);//生成MD5
+                }
                 //类型-时间-是否显示catg,time,show,sameKey,key判断是是否相同值
                 userTimeTypeDataArr.push({
                     time: trace.traceTime,
                     day: String(trace.traceTime).substr(0, 8),
                     catg: trace.catg,
-                    md5: TraceCard.sameKeyGen(trace),
+                    md5: trace.md5,
                 })
             })
 
@@ -556,8 +559,6 @@ export function dataCancel(userNumber) {
         //删除数据
         dispatch(deleteData(userNumber))
 
-
-
         // dispatch({ type: ActionTypes.CHART.CHART_DELETE_DATA, userNumber })
         console.log("更新后的state:", getState());
     }
@@ -614,6 +615,15 @@ export function changeSameRadio(radioValue) {
             timeDataArray,
             sumCatg,
         })
+    }
+}
+
+export function changeTimeSelect(value){
+    return (dispatch,getState)=>{
+        return dispatch({
+            type:ActionTypes.DATA.CHANGE_TIME_SELECT,
+            timeChoose:value,
+        });
     }
 }
 

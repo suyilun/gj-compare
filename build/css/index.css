@@ -280,13 +280,15 @@ body{
 	-ms-box-shadow: 0 0 7px #f0f0f0;
 	box-shadow: 0 0 7px #f0f0f0;
 	cursor:pointer;
-}
-.life-same{
-	border-left-color:#fd6461;
+	border-left-color:#c8c8c8;
 }
 .life-day{
 	border-left-color:#f4cd56;
 }
+.life-same{
+	border-left-color:#fd6461;
+}
+
 .life-single h1,.life-single ul{
 	display:block;
 	padding-left:15px;
@@ -396,7 +398,12 @@ body{
 	width:10px;
 	height:10px;
 	margin-top:31px;
+	border:1px solid #646464;
+	background-color:#c8c8c8;
 }
+
+
+
 .life-time li i.today-same{
 	border:1px solid #fd6461;
 	background-color:#ffb9b8;	
@@ -414,12 +421,18 @@ body{
 	background:none;
 }
 /*奇怪的东西都在这里*/
+
+
 .life-box{
 	width:auto;
 	height:120px;
 	overflow:hidden;
-	border-bottom:1px solid #e6e6e6
+	border-bottom:1px solid #e6e6e6;
 }
+.life-box.even li:nth-last-of-type{
+	background-color:rgb(240,240,240);
+}
+
 .life-box li.frist{
 	margin-left: 40px;
 }
@@ -437,13 +450,14 @@ body{
 	width:40px;
 	padding:0;
 }
+
+
 .max-content{
 	width: -moz-max-content;
 	width: -webkit-max-content;
 	width: -o-max-content;
 	width: -ms-max-content;
 	width: max-content;
-
 }
 /*详情*/
 .slide-top{

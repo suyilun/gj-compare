@@ -15,8 +15,6 @@ const data = (state = {}, action) => {
     }
 }
 
-
-
 const initFilter = () => {
     const date = new Date();
     // optionName: '旅馆', optionClass: 'lg-life', ischeck: true, value: 'lg',
@@ -27,6 +25,7 @@ const initFilter = () => {
         userNumber: '',
         options: TraceCard.typeOptions,
         radioValue: 'all',
+        timeChoose:null,
     };
 
 }
@@ -87,7 +86,7 @@ function date_type(state, action) {
             return Object.assign(stateClone, { timeDataArray });
         case ActionTypes.OPTION.CHANGE_CHECK:
         case ActionTypes.FILTER.RADIO_CHANGE:
-            return Object.assign(state, { timeDataArray });
+            return Object.assign({},state, { timeDataArray });
         default: return state;
     }
 }
@@ -111,7 +110,7 @@ function mappings(mappingsInState = {}, action) {
     const { type, userNumber, userDateMap } = action;
     switch (type) {
         case ActionTypes.DATA.MAPPING:
-            return Object.assign(mappingsInState, { [userNumber]: userDateMap });
+            return Object.assign({},mappingsInState, { [userNumber]: userDateMap });
         case ActionTypes.DATA.DELETE_MAPPING:
             const clone = _.cloneDeep(mappingsInState);
             delete clone[userNumber];
@@ -121,8 +120,6 @@ function mappings(mappingsInState = {}, action) {
     }
 }
 
-
-
 function oneTrackDetail(state = {}, action) {
     switch (action.type) {
         case ActionTypes.DATA.LOAD_ONETRACK_DETAIL:
@@ -130,9 +127,7 @@ function oneTrackDetail(state = {}, action) {
         default:
             return state;
     }
-
 }
-
 
 function chartData(chartDataInState = {}, action) {
     switch (action.type) {
@@ -148,11 +143,10 @@ function chartData(chartDataInState = {}, action) {
 }
 
 //--------------顶部删选--------------------
-
 const filterData = (filterInState = initFilter(), action) => {
     switch (action.type) {
         case ActionTypes.FILTER.SET_START_TIME:
-            return Object.assign(filterInState, { startTime: action.startTime });
+            return Object.assign({},filterInState, { startTime: action.startTime });
         case ActionTypes.FILTER.SET_END_TIME:
             return Object.assign({}, filterInState, { endTime: action.endTime });
         case ActionTypes.FILTER.SET_USERNUMBER:
@@ -168,6 +162,9 @@ const filterData = (filterInState = initFilter(), action) => {
         case ActionTypes.FILTER.RADIO_CHANGE:
             const { radioValue } = action;
             return Object.assign({}, filterInState, { radioValue });
+        case ActionTypes.DATA.CHANGE_TIME_SELECT:
+            const {timeChoose}=action;
+            return Object.assign({},filterInState,{timeChoose});
         default:
             return filterInState;
     }
