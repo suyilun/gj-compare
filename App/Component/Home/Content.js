@@ -21,8 +21,6 @@ import OneDayIndex from '../PartOption/oneDayIndexOption';
 import DetailOption from '../PartOption/detailOption';
 import 'react-vis/dist/style.css';
 
-
-
 const Option = Select.Option;
 const timestamp = new Date('May 23 2017').getTime();
 const ONE_DAY = 86400000;
@@ -51,7 +49,43 @@ const TimeLine = ({ timeDataArray }) => {
     );
 }
 
+class TimeSelect extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { nowMonth: null };
+    }
+
+    render() {
+        const { timeDataArray, changeTimeSelect } = this.props;
+        return (
+            <Select
+                size="small"
+                value={this.state.nowMonth}
+                onChange={changeTimeSelect}
+                style={{ width: "75px" }}>
+                {
+                    //日期
+                    timeDataArray.map(
+                        (timeData) => {
+                            return (
+                                <Option value={timeData.month}>{timeData.month}</Option>
+                            )
+                        }
+                    )
+                }
+            </Select>
+        )
+    }
+}
+
 const Peoples = () => { }
+
+// const TimeSelectShow=()=>{
+//     return (
+
+
+//     )
+// }
 
 const PersonTaces = ({ showDetailFunc, data }) => {
     let all = [];
@@ -137,17 +171,127 @@ const BaseTimeLine = ({ timeDataArray, sameDay, sameMd5 }) => {
 };
 
 class Content extends React.Component {
+
+    constructor(props) {
+        super(props);
+        const { traceWidth } = this.props.ui;//窗口宽度
+        this.timePosition = {};
+        // this.state = { nowMonth: null };
+        // this.timePosition = {};//位置距离
+        //console.log("this.timePosition %o", this.timePosition)
+        //this.state = { scrollWidth: 0 };
+    }
+
+    // componentDidUpdate(prevProps) {
+    //     //判断状态是否有变化
+    //     //filterData属性变化，radioValue变化，用户变化
+    //     let needUpdate = false;
+    //     const prevRadio = prevProps.data.filterData.radioValue;
+    //     const radio = this.props.data.filterData.radioValue;
+    //     needUpdate = prevRadio != radio
+    //     if (!needUpdate) {
+    //         const prevOptions = prevProps.data.filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value })
+    //             .join(",");
+    //         const options = this.props.data.filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value })
+    //             .join(",");
+    //         needUpdate = prevOptions != options;
+    //     }
+    //     if (!needUpdate) {
+    //         const prevUsers = Object.keys(prevProps.data.loadData);
+    //         const users = Object.keys(this.props.data.loadData);
+    //         for (var i = 0; i < prevUsers.length; i++) {
+    //             if (users.indexOf(prevUsers[i]) == -1) {
+    //                 needUpdate = true;
+    //                 break;
+    //             }
+    //         }
+    //         if (!needUpdate) {
+    //             for (var i = 0; i < users.length; i++) {
+    //                 if (prevUsers.indexOf(users[i]) == -1) {
+    //                     needUpdate = true;
+    //                     break;
+    //                 }
+    //             }
+    //         }
+
+    //         if (needUpdate) {
+    //             const timeDataArray = this.props.data.desc.date_type.timeDataArray;
+    //             timeDataArray.map((timeData) => {
+    //                 if (typeof timePosition[timeData.month] == 'undefined') {
+    //                     this.timePosition[timeData.month] = 40;
+    //                 } else {
+    //                     timeData.dayData.map((timeInDay) => {
+    //                         this.timePosition[timeData.month] = this.timePosition[timeData.month] + 210;
+    //                     });
+    //                 }
+    //             })
+    //             console.log("修改日期位置.....%o", this.timePosition);
+    //         }
+    //     }
+    //}
+
+    componentWillUpdate(nextProps, nextState) {
+        let tempPosition = {};
+        const timeDataArray = nextProps.data.desc.date_type.timeDataArray;
+        let newDay = null;
+        timeDataArray.map((timeData) => {
+            if (typeof tempPosition[timeData.month] == 'undefined') {
+                tempPosition[timeData.month] = 0;
+            }
+            if (newDay != timeData.day) {
+                tempPosition[timeData.month] = tempPosition[timeData.month] + 40;
+            }
+            timeData.dayData.map((timeInDay) => {
+                tempPosition[timeData.month] = tempPosition[timeData.month] + 210;
+            });
+        });
+        this.timePosition = tempPosition;
+        console.log("%o 转时间位置 %o", timeDataArray, this.timePosition);
+    }
+
+    moveTimeScroller = (value) => {
+        let nowMonth = null;
+        for (var month in this.timePosition) {
+            value = value - this.timePosition[month];
+            if (value < 0) {
+                nowMonth = month;
+                break;
+            }
+        }
+        this.refs.timeSelectRef.setState({ nowMonth })
+    }
+
+    changeTimeSelect = (nowMonth) => {
+        this.refs.timeSelectRef.setState({ nowMonth })
+        let scrollerWidth = 0;
+        for (var month in this.timePosition) {
+            if (month == nowMonth) {
+                break;
+            }
+            scrollerWidth += this.timePosition[month];
+        }
+        console.log("changeTimeSelect:", nowMonth, scrollerWidth, this.timePosition)
+        this.refs.personTraceRef.scrollLeft = scrollerWidth;
+        this.refs.timelineRef.scrollLeft = scrollerWidth;
+    }
+
     componentDidMount() {
+        //const { moveTimeScroller } = this.props;
+        let self = this;
         this.refs.personsRef.addEventListener('scroll', () => {
             this.refs.personTraceRef.scrollTop = this.refs.personsRef.scrollTop;
         });
         this.refs.personTraceRef.addEventListener('scroll', () => {
-            this.refs.timelineRef.scrollLeft = this.refs.personTraceRef.scrollLeft;
+            //年月切换
+            const value = this.refs.personTraceRef.scrollLeft;
+            self.moveTimeScroller(value);
+            this.refs.timelineRef.scrollLeft = value;
         });
     }
 
+
     render() {
-        let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart, changeSameRadioFunc, changeTimeSelect } = this.props;
+        let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart, changeSameRadioFunc } = this.props;
         console.log("content改变：", this.props);
         //height:计算content的高度
         //console.log("是否显示Top",isTopShow);
@@ -157,7 +301,6 @@ class Content extends React.Component {
         } else {
             height = document.body.clientHeight - 85 - 60;
         }
-
         const { loadData, chartData } = data;
         const timeDataArray = data.desc.date_type.timeDataArray;
         const sameDay = data.desc.sameDay;
@@ -169,7 +312,6 @@ class Content extends React.Component {
                 timeChoose = timeDataArray[0].month;
             }
         }
-
         return (
             <Row>
                 <Col span="24">
@@ -182,33 +324,18 @@ class Content extends React.Component {
                                 className="life-person"
                                 style={{ height: height - 41, maxHeight: height - 41, overflowX: "hidden" }}>
                                 {Object.keys(loadData).map(key => {
-                                    return (<PeoplePic pname={loadData[key].people.name}
-                                        index={loadData[key].people.userNumber}
-                                        key={key}
-                                    />);
+                                    return (
+                                        <PeoplePic pname={loadData[key].people.name}
+                                            index={loadData[key].people.userNumber}
+                                            key={key}
+                                        />);
                                 })}
                             </ul>
                         </Spin>
                     </div>
                     <div className="b-left">
                         <div style={{ marginTop: 21 }}>
-                            <Select
-                                size="small"
-                                value={timeChoose}
-                                onChange={changeTimeSelect}
-                                style={{ width: "75px" }}>
-                                {
-                                    //日期
-                                    timeDataArray.map(
-                                        (timeData) => {
-                                            return (
-                                                <Option value={timeData.month}>{timeData.month}</Option>
-                                            )
-                                        }
-                                    )
-                                }
-                            </Select>
-
+                            <TimeSelect ref={"timeSelectRef"} timeDataArray={timeDataArray} changeTimeSelect={this.changeTimeSelect} />
                         </div>
                     </div>
                     <div className="collect">
@@ -258,7 +385,7 @@ class Content extends React.Component {
     }
 
     //时间滚动条
-    //    
+
 }
 
 
@@ -281,12 +408,15 @@ function mapDispatchToProps(dispatch) {
         changeShowChart: (value) => {
             dispatch(Actions.changeShowChart(value));
         },
-        changeTimeSelect: (value) => {
-            dispatch(Actions.changeTimeSelect(value));
-        },
+        // changeTimeSelect: (value) => {
+        //     dispatch(Actions.changeTimeSelect(value));
+        // },
         showDetailFunc: () => {
             dispatch(Actions.loadDetail())
         },
+        // moveTimeScroller: (value) => {
+        //     //dispatch(Actions.scrollerTimeLine(value));
+        // },
         changeSameRadioFunc: (e) => {
             dispatch(Actions.changeSameRadio(e.target.value))
         }

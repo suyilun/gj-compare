@@ -433,8 +433,8 @@ export function loadData(sfzh) {
                 userDateMap[trace.traceTime] = {
                     index: index,
                 };
-                if(!trace.md5){
-                    trace.md5=TraceCard.sameKeyGen(trace);//生成MD5
+                if (!trace.md5) {
+                    trace.md5 = TraceCard.sameKeyGen(trace);//生成MD5
                 }
                 //类型-时间-是否显示catg,time,show,sameKey,key判断是是否相同值
                 userTimeTypeDataArr.push({
@@ -618,15 +618,27 @@ export function changeSameRadio(radioValue) {
     }
 }
 
-export function changeTimeSelect(value){
-    return (dispatch,getState)=>{
+export function changeTimeSelect(value) {
+    return (dispatch, getState) => {
         return dispatch({
-            type:ActionTypes.DATA.CHANGE_TIME_SELECT,
-            timeChoose:value,
+            type: ActionTypes.DATA.CHANGE_TIME_SELECT,
+            timeChoose: value,
         });
     }
 }
 
+
+export function scrollerTimeLine(scrollWidth) {
+    return (dispatch, getState) => {
+        const timeDataArray=getState().data.desc.date_type.timeDataArray;
+        //根据滚动轴计算
+
+        return dispatch({
+            type: ActionTypes.UI.SCROLLER_TIME_LINE,
+            scrollWidth,
+        })
+    }
+}
 
 
 
