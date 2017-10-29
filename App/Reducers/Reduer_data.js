@@ -2,6 +2,7 @@ import _ from 'lodash';
 import ActionTypes from '../Actions/ActionTypes';
 import TraceCard from '../Component/PartOption/TraceCard';
 import axios from 'axios';
+import { Message } from 'antd';
 
 const data = (state = {}, action) => {
     //console.log("进入reduce-data:",action)
@@ -12,6 +13,7 @@ const data = (state = {}, action) => {
         oneTrackDetail: oneTrackDetail(state.oneTrackDetail, action),
         chartData: chartData(state.chartData, action),
         filterData: filterData(state.filterData, action),
+        error: error(state.error, action)
     }
 }
 
@@ -25,7 +27,7 @@ const initFilter = () => {
         userNumber: '',
         options: TraceCard.typeOptions,
         radioValue: 'all',
-        timeChoose:null,
+        timeChoose: null,
     };
 
 }
@@ -46,6 +48,7 @@ function sameMd5Fun(state, action) {
     switch (type) {
         case ActionTypes.DATA.MD5_COLLECTOR:
         case ActionTypes.DATA.MD5_DELETE:
+        case ActionTypes.DATA.DATA_SAMEMD5_REGET:
             return sameMd5;
         default: return state;
     }
@@ -56,6 +59,7 @@ function sameDayFun(state, action) {
     switch (type) {
         case ActionTypes.DATA.DATE_COLLECTOR:
         case ActionTypes.DATA.DATE_DELETE:
+        case ActionTypes.DATA.DATA_SAMEDAY_REGET:
             return sameDay;
         default:
             return state;
@@ -68,6 +72,7 @@ function sumCatgFun(state, action) {
         case ActionTypes.DATA.SUMCATG_COLLECTOR:
         case ActionTypes.DATA.SUMCATG_DELETE:
         case ActionTypes.FILTER.RADIO_CHANGE:
+        case ActionTypes.DATA.DATA_SUMCATG_REGET:
             return sumCatg;
         default:
             return state;
@@ -86,20 +91,31 @@ function date_type(state, action) {
             return Object.assign(stateClone, { timeDataArray });
         case ActionTypes.OPTION.CHANGE_CHECK:
         case ActionTypes.FILTER.RADIO_CHANGE:
-            return Object.assign({},state, { timeDataArray });
+            return Object.assign({}, state, { timeDataArray });
+        case ActionTypes.DATA.DATA_DATETYPE_REGET:
+            const { userDateTypeMap } = action;//userDateTypeMap为 身份证：时间类型数组
+            return Object.assign({}, state, userDateTypeMap, { timeDataArray })
         default: return state;
     }
 }
 
 //加载原始数据state
 function loadData(loadDataInState = {}, action) {
+    const loadDataClone = _.cloneDeep(loadDataInState);
     switch (action.type) {
         case ActionTypes.DATA.ADD_RECEIVE:
-            loadDataInState[action.userNumber] = action.userData;
-            return loadDataInState;//由ajax添加数据值resource
+            loadDataClone[action.userNumber] = action.userData;
+            return loadDataClone;//由ajax添加数据值resource
         case ActionTypes.DATA.DATA_DELETE:
-            delete loadDataInState[action.userNumber];
-            return Object.assign({}, loadDataInState);
+            delete loadDataClone[action.userNumber];
+            return loadDataClone;
+        case ActionTypes.DATA.DATA_REGET:
+            //重新检索数据
+            const { personDataList } = action;
+            personDataList.map(personData => {
+                loadDataClone[personData.people.userNumber] = personData;
+            })
+            return loadDataClone;
         default:
             return loadDataInState;
     }
@@ -110,11 +126,14 @@ function mappings(mappingsInState = {}, action) {
     const { type, userNumber, userDateMap } = action;
     switch (type) {
         case ActionTypes.DATA.MAPPING:
-            return Object.assign({},mappingsInState, { [userNumber]: userDateMap });
+            return Object.assign({}, mappingsInState, { [userNumber]: userDateMap });
         case ActionTypes.DATA.DELETE_MAPPING:
             const clone = _.cloneDeep(mappingsInState);
             delete clone[userNumber];
             return clone;
+        case ActionTypes.DATA.DATA_MAPPING_REGET:
+            const { userMappingMap } = action;
+            return userMappingMap;
         default:
             return mappingsInState;
     }
@@ -146,7 +165,7 @@ function chartData(chartDataInState = {}, action) {
 const filterData = (filterInState = initFilter(), action) => {
     switch (action.type) {
         case ActionTypes.FILTER.SET_START_TIME:
-            return Object.assign({},filterInState, { startTime: action.startTime });
+            return Object.assign({}, filterInState, { startTime: action.startTime });
         case ActionTypes.FILTER.SET_END_TIME:
             return Object.assign({}, filterInState, { endTime: action.endTime });
         case ActionTypes.FILTER.SET_USERNUMBER:
@@ -163,10 +182,17 @@ const filterData = (filterInState = initFilter(), action) => {
             const { radioValue } = action;
             return Object.assign({}, filterInState, { radioValue });
         case ActionTypes.DATA.CHANGE_TIME_SELECT:
-            const {timeChoose}=action;
-            return Object.assign({},filterInState,{timeChoose});
+            const { timeChoose } = action;
+            return Object.assign({}, filterInState, { timeChoose });
         default:
             return filterInState;
+    }
+}
+
+function error(errorInState = {}, action) {
+    const { type, errorMsg } = action;
+    switch (type) {
+        case ActionTypes.DATA.ERROR_MSG: Message.error(errorMsg);
     }
 }
 

@@ -1,13 +1,18 @@
-import {connect} from 'react-redux'
+import { connect } from 'react-redux'
 import React from 'react';
+import { Modal } from 'antd';
 import * as Actions from '../../Actions/Actions';
 
-const DetailOptionShow = ({showDetail,showFunc}) => (
-    <div className="layer" style={{display:showDetail?'block':'none'}}>
+
+
+
+const DetailOptionShow = ({ showDetail, showFunc }) => (
+
+    <div className="layer" style={{ display: showDetail ? 'block' : 'none' }}>
         <div className="layer-part">
             <p className="layer-title">
                 <span>旅馆信息</span>
-                <a onClick={()=>{showFunc()}}>
+                <a onClick={() => { showFunc() }}>
                     <span className="layer-tb"></span>
                     <span className="layer-lr"></span>
                 </a>
@@ -45,31 +50,40 @@ const DetailOptionShow = ({showDetail,showFunc}) => (
 );
 
 
-class DetailOption extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    let {detailShow,showFunc} = this.props;
+const TraceModal = ({ showDetail, showFunc }) => {
     return (
-        <DetailOptionShow showDetail={detailShow} showFunc={showFunc}/>
+        <Modal visible={showDetail} title="ceshiceshi" onCancel={showFunc} footer={null}>
+            babababab
+        </Modal>
     );
-  }
+}
+//  <DetailOptionShow showDetail={detailShow} showFunc={showFunc} />
+
+class DetailOption extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        let { detailShow, showFunc } = this.props;
+        return (
+            <TraceModal showDetail={detailShow} showFunc={showFunc} />
+        );
+    }
 }
 
 
 function mapStateToProps(state) {
     return {
-        detailShow:state.ui.Detail.showDetail
+        detailShow: state.ui.Detail.showDetail
     }
 }
 
 function mapDispatchToProps(dispatch) {
-    return{
-            showFunc:()=>{dispatch(Actions.showDetail(false))},
+    return {
+        showFunc: () => { dispatch(Actions.showDetail(false)) },
     }
 }
 
 
-export default connect(mapStateToProps,mapDispatchToProps)(DetailOption)
+export default connect(mapStateToProps, mapDispatchToProps)(DetailOption)

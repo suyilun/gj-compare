@@ -57,10 +57,15 @@ class TimeSelect extends React.Component {
 
     render() {
         const { timeDataArray, changeTimeSelect } = this.props;
+        const { nowMonth } = this.state;
+        let currentMonth = null;
+        if (timeDataArray.length > 0) {
+            currentMonth = nowMonth ? nowMonth: timeDataArray[0].month ;
+        }
         return (
             <Select
                 size="small"
-                value={this.state.nowMonth}
+                value={currentMonth}
                 onChange={changeTimeSelect}
                 style={{ width: "75px" }}>
                 {

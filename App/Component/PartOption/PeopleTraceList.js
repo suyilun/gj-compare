@@ -27,6 +27,9 @@ class PeopleTraceList extends React.Component {
                 if (mappingItem) {
                     const index = mappingItem.index;
                     const trace = userTrace[index];
+                    if(!trace){
+                        return;
+                    }
                     const isSameMd5 = sameMd5[trace.md5] ? sameMd5[trace.md5] > 1 : false;
                     const traceStyle = classNames({ "life-single": true, "life-day": isSameDay, "life-same": isSameMd5 });
                     result.push(

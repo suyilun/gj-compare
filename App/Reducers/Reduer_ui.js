@@ -7,7 +7,6 @@ const ui = (state = initUI, action) => {
         Detail: changeDetail(state.Detail, action),
         isLoad: changeLoadStatus(state.isLoad, action),
         traceWidth: initUI.traceWidth,//窗口宽度
-        scrollWidth: scrollerTimeLine(state.scrollerWidth, action),//滚动距离
         showChart: function (showChartInState, action) {
             switch (action.type) {
                 case ActionTypes.UI.CHANGE_SHOW_CHART:
@@ -63,15 +62,6 @@ function changeLoadStatus(state, action) {
     }
 }
 
-function scrollerTimeLine(state, action) {
-    //滚动->日期修改
-    const { type, scrollWidth } = action;
-    console.log("scrollerTimeLine %o", scrollWidth);
-    switch (type) {
-        case ActionTypes.UI.SCROLLER_TIME_LINE:
-            return scrollWidth;
-        default: return state;
-    }
-}
+
 
 export default ui

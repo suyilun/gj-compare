@@ -17,7 +17,7 @@ const Option = ({ ischeck, optionClass, optionName, checkOption, sumRows }) => (
 class Head extends React.Component {
     render() {
         //console.log("top改变:",this.props)
-        let { topShow, filterData, sumCatg, setStartTime, setEndTime, checkOption } = this.props;
+        let { topShow, filterData, sumCatg, setStartTime, setEndTime, checkOption, reGetTraces } = this.props;
         const { options, startTime, endTime, } = filterData;
         return (
             <Row height="40px" className="top" style={{ display: topShow ? 'block' : 'none' }}>
@@ -45,7 +45,7 @@ class Head extends React.Component {
                         <DatePicker defaultValue={moment(startTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setStartTime(dateString) }} />
                         -
                          <DatePicker defaultValue={moment(endTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setEndTime(dateString) }} />
-                        <Button icon="user" style={{ backgroundColor: "#fd6461" }}>重新比对</Button>
+                        <Button icon="user" style={{ backgroundColor: "#fd6461" }} onClick={reGetTraces}>重新比对</Button>
                     </div>
                 </Col>
             </Row>
@@ -64,7 +64,10 @@ function mapDispatchToProps(dispatch) {
     return {
         setStartTime: (date) => { dispatch(Actions.setStartTime(date)); },
         setEndTime: (date) => { dispatch(Actions.setEndTime(date)); },
-        checkOption: (optValue, optCheck) => { dispatch(Actions.checkOption(optValue, optCheck)); }
+        checkOption: (optValue, optCheck) => { dispatch(Actions.checkOption(optValue, optCheck)); },
+        reGetTraces: () => {
+            dispatch(Actions.reGetTraces());
+        },
     }
 }
 
