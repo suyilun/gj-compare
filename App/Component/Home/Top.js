@@ -44,7 +44,7 @@ class Head extends React.Component {
                     <div className={"searchAgain"}>
                         <DatePicker defaultValue={moment(startTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setStartTime(dateString) }} />
                         -
-                         <DatePicker defaultValue={moment(endTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setEndTime(dateString) }} />
+                        <DatePicker defaultValue={moment(endTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setEndTime(dateString) }} />
                         <Button icon="user" style={{ backgroundColor: "#fd6461" }} onClick={reGetTraces}>重新比对</Button>
                     </div>
                 </Col>
@@ -70,7 +70,5 @@ function mapDispatchToProps(dispatch) {
         },
     }
 }
-
-export default connect(mapStateToProps, mapDispatchToProps
-)(Head)
+export default connect(mapStateToProps, mapDispatchToProps)(Head)
 

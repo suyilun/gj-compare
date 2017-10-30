@@ -4,12 +4,11 @@
   "description": "React Init Structure",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack-watch": "webpack --watch",
-    "webpack-dev-osx": "export NODE_ENV=develop;webpack-dev-server -p  -d --progress   --color --profile  --content-base build/ --port 9999",
-    "webpack-dev-win": "set NODE_ENV=develop&webpack-dev-server  -p  -d   --color --profile  --content-base build/ --port 9999",
-    "webpack-build-osx": "export NODE_ENV=production;webpack -p --progress --colors ",
-    "webpack-build-win": "set NODE_ENV=production&webpack"
+    "test": "nodemon --watch webpack.config.js --exec \"webpack-dev-server --color  --progress   --env development\"",
+    "webpack-dev-osx": " webpack-dev-server --color  --progress",
+    "webpack-dev-win": " webpack-dev-server    -d   --color --profile  --content-base build/ --port 9999",
+    "webpack-build-osx": "webpack  --progress --colors ",
+    "webpack-build-win": "webpack"
   },
   "keywords": [
     "React",
@@ -60,11 +59,15 @@
     "open-browser-webpack-plugin": "^0.0.5",
     "sass-loader": "^6.0.6",
     "node-sass": "^4.0.0",
-    "webpack": "^3.4.1",
-    "webpack-dev-server": "^2.6.1",
-    "webpack-hot-middleware": "^2.18.2",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.3",
+    "webpack-hot-middleware": "^2.20.0",
     "lodash-webpack-plugin": "^0.11.4",
     "babel-eslint": "^7.2.3",
-    "babel-plugin-module-resolver": "^2.4.0"
+    "babel-plugin-module-resolver": "^2.4.0",
+    "webpack-bundle-size-analyzer": "^2.7.0",
+    "react-hot-loader": "^3.1.1",
+    "nodemon": "^1.12.1",
+    "raw-loader": "^0.5.1"
   }
 }

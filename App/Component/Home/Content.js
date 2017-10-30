@@ -3,15 +3,15 @@ import React from 'react';
 import Handle from '../PartOption/handle'
 import { Spin, Row, Col, Input, Radio, Select, Icon, Button, Switch } from 'antd';
 import classNames from 'classnames/bind';
-import {
-    XYPlot,
-    XAxis,
-    YAxis,
-    VerticalBarSeries,
-    VerticalGridLines,
-    HorizontalGridLines,
-    VerticalRectSeries
-} from 'react-vis';
+// import {
+//     XYPlot,
+//     XAxis,
+//     YAxis,
+//     VerticalBarSeries,
+//     VerticalGridLines,
+//     HorizontalGridLines,
+//     VerticalRectSeries
+// } from 'react-vis';
 
 import Immutable from 'immutable';
 import * as Actions from '../../Actions/Actions';
@@ -19,25 +19,25 @@ import PeoplePic from '../PartOption/peoplePic';
 import PeopleTraceList from '../PartOption/PeopleTraceList';
 import OneDayIndex from '../PartOption/oneDayIndexOption';
 import DetailOption from '../PartOption/detailOption';
-import 'react-vis/dist/style.css';
+// import 'react-vis/dist/style.css';
 
 const Option = Select.Option;
 const timestamp = new Date('May 23 2017').getTime();
 const ONE_DAY = 86400000;
 
-const DATA = [
-    { x: 'a', y: 1 },
-    { x: 'b', y: 2 },
-    { x: 'c', y: 1 },
-    { x: 'd', y: 2 },
+// const DATA = [
+//     { x: 'a', y: 1 },
+//     { x: 'b', y: 2 },
+//     { x: 'c', y: 1 },
+//     { x: 'd', y: 2 },
 
-]
-const DATA2 = [
-    { x: 'a', y: 1 },
-    { x: 'b', y: 2 },
-    { x: 'c', y: 1 },
-    { x: 'd', y: 2 },
-]
+// ]
+// const DATA2 = [
+//     { x: 'a', y: 1 },
+//     { x: 'b', y: 2 },
+//     { x: 'c', y: 1 },
+//     { x: 'd', y: 2 },
+// ]
 
 const TimeLine = ({ timeDataArray }) => {
     return (
@@ -140,25 +140,26 @@ const chartDataByMonth = (chartData) => {
 }
 
 const TraceChart = ({ userChartDataMonth }) => (
-    <XYPlot
-        xType="ordinal"
-        yDomain={[userChartDataMonth.min, userChartDataMonth.max]}
-        width={document.body.clientWidth - 116}
-        height={139} >
-        <VerticalGridLines />
-        <HorizontalGridLines />
-        <XAxis />
-        <YAxis />
-        {
-            userChartDataMonth.userTimeDatas.map(
-                item => {
-                    return (
-                        <VerticalBarSeries data={item.xData} style={{ stroke: '#fff' }} />
-                    )
-                }
-            )
-        }
-    </XYPlot>
+    <div>TraceChart</div>
+    // <XYPlot
+    //     xType="ordinal"
+    //     yDomain={[userChartDataMonth.min, userChartDataMonth.max]}
+    //     width={document.body.clientWidth - 116}
+    //     height={139} >
+    //     <VerticalGridLines />
+    //     <HorizontalGridLines />
+    //     <XAxis />
+    //     <YAxis />
+    //     {
+    //         userChartDataMonth.userTimeDatas.map(
+    //             item => {
+    //                 return (
+    //                     <VerticalBarSeries data={item.xData} style={{ stroke: '#fff' }} />
+    //                 )
+    //             }
+    //         )
+    //     }
+    // </XYPlot>
 );
 
 const BaseTimeLine = ({ timeDataArray, sameDay, sameMd5 }) => {
@@ -427,7 +428,6 @@ function mapDispatchToProps(dispatch) {
         }
     }
 }
-
 //<Switch size="small" checked={ui.showChart} onChange={changeShowChart} />
 export default connect(mapStateToProps, mapDispatchToProps
 )(Content)

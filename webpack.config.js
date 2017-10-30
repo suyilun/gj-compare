@@ -4,108 +4,68 @@
  */
 const webpack = require('webpack');
 const path = require('path');
-const env = require('./Env/env');
-
-const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
-// const HtmlwebpackPlugin = require('html-webpack-plugin');
+const { resolve } = require('path');
 const OpenBrowserPlugin = require('open-browser-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const WebpackBundleSizeAnalyzerPlugin = require('webpack-bundle-size-analyzer').WebpackBundleSizeAnalyzerPlugin;
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-//  process.env.NODE_ENV
-
-//  引用环境属性，根据profile属性来修改webpack属性
-const envPlugin = new webpack.DefinePlugin({ __ENV__: JSON.stringify(env) });
-
-const webpackOptions = {
+const config = {
+    //devtool: 'source-map',//编译速度会慢
+    //devtool:"cheap-eval-source-map",
     entry: {
-        app: ['babel-polyfill', './App/index.js'],
+        app: [
+            'react-hot-loader/patch',
+            'webpack/hot/only-dev-server',
+            './App/index.js'],//'babel-polyfill', 
     },
+    // watch: true,
     output: {
         path: path.resolve(__dirname, './build'),
         filename: '[name].js',
-        //  filename: "bundle.js"
     },
     resolve: {
-        extensions: ['.web.js', '.js', '.json', '.web.jsx', '.jsx'],
+        extensions: ['.js', '.jsx'],
     },
     plugins: [
-        envPlugin,
-        //  生成 index.html 插件
-        // , new HtmlwebpackPlugin({
-        //  D:\\nodeJs\\     title: 'Webpack-demos',
-        //     filename: 'index.html'
-        // })
-        new LodashModuleReplacementPlugin(),
-        //  提取公用js插件
-        // new webpack.optimize.CommonsChunkPlugin({
-        //     name: "common",
-        //     filename: "js/common.js",
-        //     chunks: ['index', 'detail']
-        // })
+        new webpack.NoEmitOnErrorsPlugin(),
+        //new webpack.DefinePlugin({ 'process.env.NODE_ENV': '"production"' }),
+        new webpack.DefinePlugin({ 'process.env.NODE_ENV': '"development"' }),
+        new webpack.optimize.OccurrenceOrderPlugin(),
+        new webpack.NamedModulesPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
+        new WebpackBundleSizeAnalyzerPlugin('./plain-report.txt'),//统计打包文件插件
+        new HtmlWebpackPlugin({
+            template: './App/index.html'
+        }),
+        // new webpack.optimize.UglifyJsPlugin({
+        //     compress: {
+        //         screw_ie8: true,
+        //         warnings: false
+        //     },
+        //     mangle: {
+        //         screw_ie8: true
+        //     },
+        //     output: {
+        //         comments: false,
+        //         screw_ie8: true
+        //     }
+        // }),
     ],
-    module: {
-        loaders: [{
-            test: /\.(css)$/,
-            loaders: ['style-loader', 'css-loader', 'less-loader'],
-            //loaders: ['style-loader', 'css-loader?modules&localIdentName=[local]-[hash:base64:5]', 'less-loader'],
-        },
-            {
-                test: /\.(less)$/,
-                loader: 'style-loader!css-loader!less-loader',
-            },
-            {
-                test: /\.(jpg|png)$/,
-                loader: 'url-loader?limit=8192',
-            },
-            {
-                test: /\.(eot|svg|ttf|woff|woff2)\w*/,
-                loader: 'url-loader?limit=10000&mimetype=application/font-woff',
-            },
-            {
-                test: /\.(js|jsx)$/,
-                loader: 'babel-loader',
-                exclude: '/node_modules/',
-                query: {
-                    presets: ['es2015', 'stage-0', 'react'],
-                    plugins: [['import', {
-                        libraryName: 'antd',
-                        style: true, // or 'css'
-                    }]],
-                    //  'transform-runtime'
-                    //  plugins: [
-                    //   "transform-object-rest-spread",
-                    //   "transform-es2015-arrow-functions",
-                    //   "transform-object-assign",
-                    //   "es6-promise"
-                    // ]
-                },
-            }],
-    },
-    externals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        _: 'lodash',
-        antd: 'antd',
-    },
-};
-  //console.log("-------------------------------------"+process.env.NODE_ENV+"--------------------------------------")
-
-//  开发者模式
-if (process.env.NODE_ENV === 'develop') {
-    //  热响应插件
-    webpackOptions.plugins.push(new webpack.HotModuleReplacementPlugin());
-    //  弹出界面插件
-    webpackOptions.plugins.push(
-        new OpenBrowserPlugin({
-            url: 'http://localhost:9999',
-        }));
-    //  "source-map";// #eval-
-    webpackOptions.devtool = 'source-map';
-
-    //  代理设置
-    webpackOptions.devServer = {
+    devServer: {
         port: 8083,
-        proxy: { 
+        historyApiFallback: true, //404s fallback to ./index.html
+        // hotOnly:true, 使用hotOnly和hot都可以
+        hot: true,
+        //stats: 'errors-only', //只在发生错误时输出
+        contentBase: resolve(__dirname, 'build'),
+        // host:process.env.Host, undefined
+        // port:process.env.PORT, undefined
+        overlay: { //当有编译错误或者警告的时候显示一个全屏overlay
+            errors: true,
+            warnings: true,
+        },
+        proxy: {
             '/fwzy/*': {
                 host: 'localhost',
                 target: 'http://localhost:8080/fwzy',
@@ -116,37 +76,55 @@ if (process.env.NODE_ENV === 'develop') {
                 },
             },
         },
-    };
-    //  webpackOptions.externals = Object.assign(webpackOptions.externals,
-    // {"antd": true, "moment": true})
-    //  webpackOptions.module.loaders.push();
-} else {
-    webpackOptions.plugins.push(new UglifyJsPlugin({
-        compress: {
-            warnings: false,
+    },
+    module: {
+        loaders: [{
+            test: /\.(css)$/,
+            loader: 'style-loader!css-loader?sourceMap',
+            // loaders: ['style-loader', 'css-loader', 'less-loader'],
         },
-        sourceMap: false,
-    }));
-    // webpackOptions.module.loaders.push({
-    //   test: /\.(js|jsx)$/,
-    //   loader: "babel-loader",
-    //   exclude: '/node_modules/',
-    //   query: {
-    //     compact: false,
-    //     presets: ["react", "es2015", "stage-0"],
-    //     //"plugins": ["transform-runtime"]
-    //     // plugins: [
-    //     //   "transform-object-rest-spread",
-    //     //   "transform-es2015-arrow-functions",
-    //     //   "transform-object-assign",
-    //     //   "es6-promise",
-    //     //   // ["import", [{
-    //     //   //     "libraryName": "antd",
-    //     //   //     "style-loader": true
-    //     //   // }]
-    //     //   //]
-    //     // ]
-    //   }
-    // });
-}
-module.exports = webpackOptions;
+        {
+            test: /\.(less)$/,
+            loader: 'style-loader!css-loader!less-loader',
+        },
+        {
+            test: /\.(jpg|png)$/,
+            loader: 'url-loader?limit=8192',
+        },
+        {
+            test: /\.(eot|svg|ttf|woff|woff2)\w*/,
+            loader: 'url-loader?limit=10000&mimetype=application/font-woff',
+        },
+        {
+            test: /\.html$/,
+            loader: "raw-loader" // loaders: ['raw-loader']，這個方式也是可以被接受的。
+        },
+        {
+            test: /\.(js|jsx)$/,
+            loader: 'babel-loader',
+            exclude: '/node_modules/',
+            query: {
+                compact: true,
+                presets: ['es2015', 'stage-0', 'react'],
+                plugins: [['import', {
+                    libraryName: 'antd',
+                    style: true, // or 'css'
+                }], "react-hot-loader/babel"],
+                //  'transform-runtime'
+                //  plugins: [
+                //   "transform-object-rest-spread",
+                //   "transform-es2015-arrow-functions",
+                //   "transform-object-assign",
+                //   "es6-promise"
+                // ]
+            },
+        }],
+    },
+    externals: {
+        react: 'React',
+        'react-dom': 'ReactDOM',
+        _: 'lodash',
+        antd: 'antd',
+    },
+};
+module.exports = config;
