@@ -9,8 +9,8 @@ class Main extends React.Component {
     render() {
         return (
             <div>
-                <Head/>
-                <Content/>
+                <Head key="gj-head"/>
+                <Content key="gj-content"/>
             </div>
         )
     }

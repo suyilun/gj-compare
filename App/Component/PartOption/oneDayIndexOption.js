@@ -6,19 +6,31 @@ import * as Actions from '../../Actions/Actions';
 // 6,2
 const OneDayIndexShow = ({ day, dayData, sameDay, sameMd5 }) => {
     const isSameDay = sameDay[day] ? sameDay[day] > 1 : false;
+    let prevDayTime = null;
+    const tokens = [];
+    dayData.map((time, index) => {
+        let timeStr = String(time);
+        let dayTime = `${timeStr.substr(8, 2)}:${timeStr.substr(10, 2)}`;
+        // 
+        // if(prevDayTime!=dayTime){
+        tokens.push(
+            (
+                <li key={`OneDayIndexShow-${index}`} >
+                    <hr/>
+                    <span><i className={classNames('life-radius', { 'today-day': isSameDay, 'today-same': false })}></i></span>
+                    <span><b>{`${timeStr.substr(8, 2)}:${timeStr.substr(10, 2)}`}:{timeStr.substr(12, 2)}</b></span>
+                </li>
+            )
+        );
+        //    prevDayTime=dayTime;
+        //  }
+    });
     return (
         <ul className="life-time max-content">
             <li className="life-today" id={`time-day-${day}`}>
-                <p className="today-time life-radius">{day.substr(6, 2)}</p>
+                <span className="today-time life-radius"><b>{day.substr(6, 2)}</b></span>
             </li>
-            {dayData.map((time, index) => {
-                return (
-                    <li >
-                        <i className={classNames('life-radius', { 'today-day': isSameDay, 'today-same': false })}></i>
-                        <span>{time}</span>
-                    </li>
-                )
-            })}
+            {tokens}
         </ul>
     );
 }

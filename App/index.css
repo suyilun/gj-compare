@@ -6,64 +6,33 @@ body{
 }
 
 .top{
-	position:absolute;
-	top:0;
-	left:0;
 	width:100%;
-	height:73px;
+	height:60px;
 	border-bottom:1px solid #e6e6e6;
 	background-color:#fff;
 	z-index:1;
 } 
-.index{
-	position:absolute;
-	top:74px;
-	bottom:80px;
-	left:0;
-	width:100%;
-	z-index:3;
-}
-.bottom{
-	position:absolute;
-	bottom:0;
-	left:0;
-	width:100%;
-	height:79px;
-	border-top:1px solid #e6e6e6;
-	background-color:#fff;
-	z-index:2;
-}
-/*top*/
-.t-left,.t-right{
-	height:100%;
-}
-.t-left{
-	float:left;
-}
+
 .logo,.life-class{
 	display:block;
 	float:left;
 }
 .logo{
+	margin-top:10px;
 	width:118px;
-	height:70px;
-	padding:17px 11px 16px 11px;
-}
-.logo img{
-	display:block;
-	float:left;
-	width:100%;
-	height:100%;
-}
-.life-class{
 	height:50px;
-	padding:12px 0 11px 0;
+	background:url('images/index-logo02.png') no-repeat;
+}
+
+.life-class{
+	margin-top:10px;
+	height:45px;
 }
 .life-class li{
 	display:block;
 	float:left;
-	width:60px;
-	height:50px;
+	height:100%;
+	width:70px;
 	margin-left:10px;
 	cursor:pointer;
 	color:#2e89fb;
@@ -93,28 +62,28 @@ body{
 	background-position:0 -18px;
 }
 .life-class li.lg-life i{
-	background-image:url(../images/life_class/lg_life.png);
+	background-image:url(images/life_class/lg_life.png);
 }
 .life-class li.fj-life i{
-	background-image:url(../images/life_class/fj_life.png);
+	background-image:url(images/life_class/fj_life.png);
 }
 .life-class li.hc-life i{
-	background-image:url(../images/life_class/hc_life.png);
+	background-image:url(images/life_class/hc_life.png);
 }
 .life-class li.ky-life i{
-	background-image:url(../images/life_class/ky_life.png);
+	background-image:url(images/life_class/ky_life.png);
 }
 .life-class li.yl-life i{
-	background-image:url(../images/life_class/yl_life.png);
+	background-image:url(images/life_class/yl_life.png);
 }
 .life-class li.zk-life i{
-	background-image:url(../images/life_class/zk_life.png);
+	background-image:url(images/life_class/zk_life.png);
 }
 .life-class li.wb-life i{
-	background-image:url(../images/life_class/wb_life.png);
+	background-image:url(images/life_class/wb_life.png);
 }
 .life-class li.qt-life i{
-	background-image:url(../images/life_class/qt_life.png);
+	background-image:url(images/life_class/qt_life.png);
 }
 
 .searchAgain{
@@ -144,10 +113,24 @@ body{
 .index-left h1{
 	display:block;
 	width:100%;
-	border-bottom:1px solid #e6e6e6;
+	border-right:	1px solid #e6e6e6;
 	font:14px/40px "微软雅黑";
 	text-align:center;
 }
+
+.index-left h5{
+	box-shadow: inset 0 1px 2px #dcdcdc;
+	border-bottom:1px solid #e6e6e6;
+	height:18px;
+	text-align: center;
+	vertical-align: baseline;
+}
+.index-left h5 a{
+	display: block;
+	height:10px;
+	padding-top: 5px;
+}
+
 .index-left h1 span{
 	font-size:14px;
 	color:#2e89fb;
@@ -157,6 +140,7 @@ body{
 	bottom:0;
 	width:100%;
 	display:block;
+	box-shadow: inset 0 1px 2px #dcdcdc;
 }
 .life-person li {
 	position: relative;
@@ -184,9 +168,7 @@ body{
 	position:absolute;
 	bottom:0;
 	left:0;
-	height:22px;
 	background-color:rgba(50,50,50,0.5);
-	line-height:22px;
 	color:#fff;
 	text-align:center;
 }
@@ -231,20 +213,40 @@ body{
 	height:2px;
 	margin:-1px 0 0 -4px;
 }
+
+.life-person li a{
+	display:block;
+	width:100%;
+	font-size:10px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overflow:ellipsis;
+}
+
 .collect{
 	width:100%;
-	height:41px;
+	height:40px;
 	padding:7px 0;
+}
+
+.collect-right{
+	box-shadow: inset 0 1px 2px #dcdcdc;
 }
 
 .collect .all{
 	color:#000;
 }
-.collect .same{
-	color:#fd6461;
-}
+
 .collect .sameDay{
 	color:#f4cd56;
+}
+
+.collect .sameTwo{
+	color:rgb(247,166,80);
+}
+
+.collect .sameAll{
+	color:rgb(253,100,97);
 }
 
 .life-view{
@@ -265,28 +267,35 @@ body{
 	vertical-align:middle;
 }
 #life-table td.life-border{
-	background:url(../images/life_border.png) repeat-y top center;
+	background:url(images/life_border.png) repeat-y top center;
 }
 
 .life-single{
 	position:relative;
 	width:185px;
-	height:90px;
-	margin:32px auto;
+	height:100px;
+	margin: 15px auto 0px auto;
 	border-left:5px solid;
 	background-color:#fff;
-	-webkit-box-shadow: 0 0 7px #f0f0f0;
-	-moz-box-shadow: 0 0 7px #f0f0f0;
-	-ms-box-shadow: 0 0 7px #f0f0f0;
-	box-shadow: 0 0 7px #f0f0f0;
+	-webkit-box-shadow: 0 0 7px #cacaca;
+	-moz-box-shadow: 0 0 7px #cacaca;
+	-ms-box-shadow: 0 0 7px #cacaca;
+	box-shadow: 0 0 7px #cacaca;
 	cursor:pointer;
 	border-left-color:#c8c8c8;
 }
 .life-day{
 	border-left-color:#f4cd56;
+	background-color:#f1eee5;
 }
-.life-same{
-	border-left-color:#fd6461;
+.life-same-two{
+	border-left-color:rgb(247,166,80);
+	background-color:rgb(249, 227, 206);
+}
+
+.life-same-all{
+	border-left-color:rgb(253,100,97);
+	background-color:rgb(247, 217,217);
 }
 
 .life-single h1,.life-single ul{
@@ -319,8 +328,10 @@ body{
 /*bottom*/
 .b-left,.b-right{
 	position:relative;
-	height:140px;
-	border-bottom: 1px solid #e6e6e6;
+	box-shadow: inset 0 1px 2px #dcdcdc;
+	/* height:80px;  -18*/
+	/* height:60px; */
+	/* 	border-bottom: 1px solid #e6e6e6; */
 }
 .b-left{
 	float:left;
@@ -343,6 +354,11 @@ body{
 	width: 55px;
 	font: 13px/20px "微软雅黑";
 }
+
+
+
+
+
 .life-radius{
 	-webkit-border-radius:50%;
 	-moz-border-radius:50%;
@@ -350,9 +366,11 @@ body{
 	border-radius:50%;
 }
 .life-time-contant{
+	margin-top:5px;
+	height:30px;
 	/* width:auto; */
-	height:70px;
-	/* border-top:1px solid #e6e6e6; */
+	/* height:70px; */
+	    /* box-shadow: inset 0 1px 2px #dcdcdc; */
 }
 .life-time{
 	display:block;
@@ -365,44 +383,55 @@ body{
 	float:left;
 	width:210px;
 	height:100%;
-	background:url(../images/life_time.png) repeat-x center left;
+	/* background:url(images/life_time.png) repeat-x center left; */
 	text-align:center;
 }
 .life-time li.life-today{
-	width:40px;
+	width:41px;
 	background:none;
 }
-.life-time li.life-today p,.life-end p{
-	position:absolute;
-	top:50%;
-	left:50%;
-	width:28px;
-	height:28px;
-	margin:-15px 0 0 -15px;
+
+.life-time li.life-today span b{
+	font-weight: border;
 	border:1px solid #c8c8c8;
-	background-color:#fff;
-	font:14px/28px "微软雅黑";
-	text-align:center;
-	color:#2e89fb;
-	-webkit-box-shadow:0 0 5px #e6e6e6;
-	-moz-box-shadow:0 0 5px #e6e6e6;
-	-ms-box-shadow:0 0 5px #e6e6e6;
-	box-shadow:0 0 5px #e6e6e6;
-}
-.life-time li i,.life-time li span{
 	display:block;
-	margin:0 auto;
-	color:#646464;
+	-webkit-border-radius:50%;
+	-moz-border-radius:50%;
+	-ms-border-radius:50%;
+	border-radius:50%;
 }
+
+.life-time li span{
+	
+	/* height:20px; */
+	/* border:1px solid #c8c8c8; */
+	color:#2e89fb;
+}
+
+.life-time li span{
+	width:100%;
+	display:block;
+	color:#646464;
+	
+}
+.life-time li  hr{
+	position: relative;
+	top:6px;
+	z-index: -10;
+}
+
+.life-time li span b{
+	text-align: center;
+}
+
 .life-time li i{
 	width:10px;
 	height:10px;
-	margin-top:31px;
-	border:1px solid #646464;
-	background-color:#c8c8c8;
+	display:block;
+	margin-left:100px;
+	border:1px solid #123ee9;
+	background-color: #0fb1e9;
 }
-
-
 
 .life-time li i.today-same{
 	border:1px solid #fd6461;
@@ -429,22 +458,31 @@ body{
 	overflow:hidden;
 	border-bottom:1px solid #e6e6e6;
 }
+.life-box.even{
+	background:#f0f0f0;
+}
 .life-box.even li:nth-last-of-type{
 	background-color:rgb(240,240,240);
 }
 
-.life-box li.frist{
-	margin-left: 40px;
+.life-box li.life-border-day{
+	width:20px;
+	margin-left:20px;
+	border-left:1px dashed #6c6c90;
 }
+
+/*.life-box li.frist{*/
+	/*margin-left: 40px;*/
+/*}*/
 .life-box > li{
 	display:block;
 	float:left;
 	width:210px;
-	height:120px;
+	height:100%;
 	padding:0 10px;
 }
 .life-box li.life-border{
-	background:url(../images/life_border.png) repeat-y top center;
+	background:url(images/life_border.png) repeat-y top center;
 }
 .life-box li.life-nbsp{
 	width:40px;
@@ -482,10 +520,10 @@ body{
 	overflow:hidden;
 }
 .life-class li.important-life i{
-	background-image:url(../images/life_class/zd_life.png);
+	background-image:url(images/life_class/zd_life.png);
 }
 .life-class li.used-life i{
-	background-image:url(../images/life_class/used_life.png);
+	background-image:url(images/life_class/used_life.png);
 }
 .layer{
 	position:fixed;
@@ -614,3 +652,57 @@ body{
 	white-space:normal;
 }
 
+/*
+ * react-calendar-heatmap styles
+ *
+ * All of the styles in this file are optional and configurable!
+ * The github and gitlab color scales are provided for reference.
+ */
+
+ .react-calendar-heatmap text {
+	font-size: 10px;
+	fill: #aaa;
+  }
+  
+  .react-calendar-heatmap .react-calendar-heatmap-small-text {
+	font-size: 5px;
+  }
+  
+  .react-calendar-heatmap rect:hover {
+	stroke: #555;
+	stroke-width: 1px;
+  }
+  
+
+
+/*
+ * Default color scale
+ */
+
+ .react-calendar-heatmap .color-empty {
+	fill: #eeeeee;
+  }
+  
+  .react-calendar-heatmap .color-filled {
+	fill: #8cc665;
+  }
+  
+  /*
+   * Github color scale
+   */
+  
+  .react-calendar-heatmap .color-github-0 {
+	fill: #eeeeee;
+  }
+  .react-calendar-heatmap .color-github-1 {
+	fill: #d6e685;
+  }
+  .react-calendar-heatmap .color-github-2 {
+	fill: #8cc665;
+  }
+  .react-calendar-heatmap .color-github-3 {
+	fill: #44a340;
+  }
+  .react-calendar-heatmap .color-github-4 {
+	fill: #1e6823;
+  }

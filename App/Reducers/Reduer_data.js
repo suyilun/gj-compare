@@ -2,7 +2,8 @@ import _ from 'lodash';
 import ActionTypes from '../Actions/ActionTypes';
 import TraceCard from '../Component/PartOption/TraceCard';
 import axios from 'axios';
-import { Message } from 'antd';
+import { Message,notification } from 'antd';
+import moment from 'moment';
 
 const data = (state = {}, action) => {
     //console.log("进入reduce-data:",action)
@@ -19,11 +20,11 @@ const data = (state = {}, action) => {
 
 const initFilter = () => {
     const date = new Date();
-    // optionName: '旅馆', optionClass: 'lg-life', ischeck: true, value: 'lg',
-    // dataTypes: ['lg', 'lg_zj']
+    let nowTime=new Date();
+    //nowTime.setMonth(nowTime.getMonth()-1);
     return {
         startTime: date.getFullYear() + "-01-01",
-        endTime: `${date.getFullYear()}-${date.getMonth() < 10 ? "0" + date.getMonth() : date.getMonth()}-${date.getDate() < 10 ? "0" + date.getDate() : date.getDate()}`,
+        endTime: moment(nowTime).format('YYYY-MM-DD'),
         userNumber: '',
         options: TraceCard.typeOptions,
         radioValue: 'all',
@@ -192,7 +193,14 @@ const filterData = (filterInState = initFilter(), action) => {
 function error(errorInState = {}, action) {
     const { type, errorMsg } = action;
     switch (type) {
-        case ActionTypes.DATA.ERROR_MSG: Message.error(errorMsg);
+        case ActionTypes.DATA.ERROR_MSG: Message.error(errorMsg);return;
+        case ActionTypes.DATA.NOTIFY_MSG:
+            const {notifyDesc,notifyMsg}=action;
+            notification["warning"]({
+            message:notifyMsg,
+            description:notifyDesc,
+        });
+            return ;
     }
 }
 

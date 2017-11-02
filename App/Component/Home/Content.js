@@ -1,43 +1,51 @@
 import { connect } from 'react-redux'
 import React from 'react';
 import Handle from '../PartOption/handle'
-import { Spin, Row, Col, Input, Radio, Select, Icon, Button, Switch } from 'antd';
+import { Spin, Row, Col, Input, Radio, Select, Icon, Button, Switch, Table } from 'antd';
 import classNames from 'classnames/bind';
-// import {
-//     XYPlot,
-//     XAxis,
-//     YAxis,
-//     VerticalBarSeries,
-//     VerticalGridLines,
-//     HorizontalGridLines,
-//     VerticalRectSeries
-// } from 'react-vis';
-
+import {
+    XYPlot,
+    XAxis,
+    YAxis,
+    VerticalBarSeries,
+    VerticalGridLines,
+    HorizontalGridLines,
+    VerticalRectSeries
+} from 'react-vis';
+import CalendarHeatmap from 'react-calendar-heatmap';
 import Immutable from 'immutable';
 import * as Actions from '../../Actions/Actions';
 import PeoplePic from '../PartOption/peoplePic';
 import PeopleTraceList from '../PartOption/PeopleTraceList';
 import OneDayIndex from '../PartOption/oneDayIndexOption';
 import DetailOption from '../PartOption/detailOption';
+import HeatMap  from '../HeatMap/HeatMap.js';
 // import 'react-vis/dist/style.css';
+
+const BASELINE_HEIGHT = 35;
+const TOP_HEIGHT = 60;
+const SEARCH_BAR = 40;
+const BOTTOM_HEIGHT = 160;
+const PERSON_ROW_HEIGHT = 120;
+const LEFT_HEIGHT = 116;
 
 const Option = Select.Option;
 const timestamp = new Date('May 23 2017').getTime();
 const ONE_DAY = 86400000;
 
-// const DATA = [
-//     { x: 'a', y: 1 },
-//     { x: 'b', y: 2 },
-//     { x: 'c', y: 1 },
-//     { x: 'd', y: 2 },
+const DATA = [
+    { x: 'a', y: 1 },
+    { x: 'b', y: 2 },
+    { x: 'c', y: 1 },
+    { x: 'd', y: 2 },
 
-// ]
-// const DATA2 = [
-//     { x: 'a', y: 1 },
-//     { x: 'b', y: 2 },
-//     { x: 'c', y: 1 },
-//     { x: 'd', y: 2 },
-// ]
+]
+const DATA2 = [
+    { x: 'a', y: 1 },
+    { x: 'b', y: 2 },
+    { x: 'c', y: 1 },
+    { x: 'd', y: 2 },
+]
 
 const TimeLine = ({ timeDataArray }) => {
     return (
@@ -60,10 +68,11 @@ class TimeSelect extends React.Component {
         const { nowMonth } = this.state;
         let currentMonth = null;
         if (timeDataArray.length > 0) {
-            currentMonth = nowMonth ? nowMonth: timeDataArray[0].month ;
+            currentMonth = nowMonth ? nowMonth : timeDataArray[0].month;
         }
         return (
             <Select
+                key="TimeSelect-ant-select"
                 size="small"
                 value={currentMonth}
                 onChange={changeTimeSelect}
@@ -73,7 +82,7 @@ class TimeSelect extends React.Component {
                     timeDataArray.map(
                         (timeData) => {
                             return (
-                                <Option value={timeData.month}>{timeData.month}</Option>
+                                <Option key={`TimeSelect-ant-select-option-${timeData.month}`} value={timeData.month}>{timeData.month}</Option>
                             )
                         }
                     )
@@ -83,14 +92,26 @@ class TimeSelect extends React.Component {
     }
 }
 
+class MonthLeftShow extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { nowMonth: null };
+    }
+    render() {
+        let currentMonth = null;
+        const { nowMonth } = this.state;
+        const { userNumberSize, timeDataArray } = this.props;
+        if (timeDataArray.length > 0) {
+            currentMonth = nowMonth ? nowMonth : timeDataArray[0].month;
+        }
+        if (userNumberSize == 0) {
+            return (null);
+        }
+        return (<h5 style={{ height: BASELINE_HEIGHT }}><a>{currentMonth}</a></h5>);
+    }
+}
+
 const Peoples = () => { }
-
-// const TimeSelectShow=()=>{
-//     return (
-
-
-//     )
-// }
 
 const PersonTaces = ({ showDetailFunc, data }) => {
     let all = [];
@@ -98,9 +119,9 @@ const PersonTaces = ({ showDetailFunc, data }) => {
     for (let userNumber in data.loadData) {
         all.push(
             <PeopleTraceList
+                key={`PeopleTraceList-${userNumber}`}
                 classNameExt={classNames({ "odd": count % 2 != 0, "even": count % 2 == 0 })}
                 userNumber={userNumber}
-                key={userNumber}
                 data={data}
                 showDetailFunc={showDetailFunc}
             />)
@@ -140,38 +161,130 @@ const chartDataByMonth = (chartData) => {
 }
 
 const TraceChart = ({ userChartDataMonth }) => (
-    <div>TraceChart</div>
-    // <XYPlot
-    //     xType="ordinal"
-    //     yDomain={[userChartDataMonth.min, userChartDataMonth.max]}
-    //     width={document.body.clientWidth - 116}
-    //     height={139} >
-    //     <VerticalGridLines />
-    //     <HorizontalGridLines />
-    //     <XAxis />
-    //     <YAxis />
-    //     {
-    //         userChartDataMonth.userTimeDatas.map(
-    //             item => {
-    //                 return (
-    //                     <VerticalBarSeries data={item.xData} style={{ stroke: '#fff' }} />
-    //                 )
-    //             }
-    //         )
-    //     }
-    // </XYPlot>
+    <XYPlot
+        xType="ordinal"
+        yDomain={[userChartDataMonth.min, userChartDataMonth.max]}
+        width={document.body.clientWidth - LEFT_HEIGHT}
+        height={139} >
+        <VerticalGridLines />
+        <HorizontalGridLines />
+        <XAxis />
+        <YAxis />
+        {
+            userChartDataMonth.userTimeDatas.map(
+                item => {
+                    return (
+                        <VerticalBarSeries data={item.xData} style={{ stroke: '#fff' }} />
+                    )
+                }
+            )
+        }
+    </XYPlot>
 );
+
+
+const TraceAnaylse = () => {
+
+    var until = '2016-06-30';
+    return (
+        <div >
+            <CalendarHeatmap
+                horizontal={true}
+                startDate={new Date("2016-11-01")}
+                endDate={new Date('2017-11-06')}
+                showWeekdayLabels={true}
+                weekdayLabels={['日', '一', '二', '三', '四', '五', '六']}
+                monthLabels={['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']}
+                values={[
+                    { date: '2016-12-01', count: 1 },
+                    { date: '2016-01-03', count: 4 },
+                    { date: '2017-11-01', count: 2 },
+                    // ...and so on
+                ]}
+            />
+            
+        </div>
+    )
+}
+
+
+const TraceTable = () => {
+    const columns = [{
+        title: 'Name',
+        dataIndex: 'name',
+    }, {
+        title: '旅馆',
+        dataIndex: 'lg',
+    }, {
+        title: '飞机',
+        dataIndex: 'fj',
+    },
+    {
+        title: '火车',
+        dataIndex: 'hc',
+    },
+    {
+        title: '客运',
+        dataIndex: 'ly',
+    },
+    {
+        title: '医疗',
+        dataIndex: 'yl',
+    },
+    {
+        title: '暂口',
+        dataIndex: 'zk',
+    },
+    {
+        title: '网吧',
+        dataIndex: 'wb',
+    },
+    {
+        title: '其他',
+        dataIndex: 'qt',
+    },
+
+    ];
+    const data = [
+        {
+            name: "测试",
+            key: '1', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
+        },
+        {
+            name: "测试",
+            key: '2', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
+        },
+        {
+            name: "测试",
+            key: '3', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
+        },
+        {
+            name: "测试",
+            key: '4', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
+        },
+        {
+            name: "测试",
+            key: '5', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
+        },
+        {
+            name: "测试",
+            key: '6', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
+        },
+    ];
+    return (<Table scroll={{ y: BOTTOM_HEIGHT-45 }} columns={columns} dataSource={data} size="small" pagination={false} />)
+}
+
 
 const BaseTimeLine = ({ timeDataArray, sameDay, sameMd5 }) => {
     const timeTokens = [];
     timeDataArray.map((timeData => {
-        timeTokens.push(<OneDayIndex day={timeData.day} dayData={timeData.dayData} sameDay={sameDay} sameMd5={sameMd5} />);
+        timeTokens.push(<OneDayIndex key={`${timeData.day}`} day={timeData.day} dayData={timeData.dayData} sameDay={sameDay} sameMd5={sameMd5} />);
     }))
     return (
         <div className="life-time-contant max-content">
             {timeTokens}
             <div className="life-today life-end">
-                <p className="today-time life-radius">End</p>
+                <span className="today-time life-radius"><b>End</b></span>
             </div>
         </div>);
 };
@@ -219,7 +332,6 @@ class Content extends React.Component {
     //                 }
     //             }
     //         }
-
     //         if (needUpdate) {
     //             const timeDataArray = this.props.data.desc.date_type.timeDataArray;
     //             timeDataArray.map((timeData) => {
@@ -264,7 +376,8 @@ class Content extends React.Component {
                 break;
             }
         }
-        this.refs.timeSelectRef.setState({ nowMonth })
+        this.refs.timeSelectRef.setState({ nowMonth });
+        this.refs.monthLeftShowRef.setState({ nowMonth })
     }
 
     changeTimeSelect = (nowMonth) => {
@@ -295,19 +408,23 @@ class Content extends React.Component {
         });
     }
 
-
     render() {
         let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart, changeSameRadioFunc } = this.props;
         console.log("content改变：", this.props);
-        //height:计算content的高度
-        //console.log("是否显示Top",isTopShow);
-        let height = {};
-        if (ui.Top.showTop) {
-            height = document.body.clientHeight - 152 - 60;//60 每个减少20像素获取的
-        } else {
-            height = document.body.clientHeight - 85 - 60;
-        }
         const { loadData, chartData } = data;
+        let height = {};
+        const userNumberSize = Object.keys(loadData).length;
+        if (ui.Top.showTop) {
+            height = window.innerHeight - (TOP_HEIGHT + BOTTOM_HEIGHT + SEARCH_BAR);
+        } else {
+            height = window.innerHeight - (BOTTOM_HEIGHT + SEARCH_BAR);
+        }
+        if (userNumberSize != 0) {
+            //有用户，出现日期条
+            height = height - BASELINE_HEIGHT;
+        }
+
+
         const timeDataArray = data.desc.date_type.timeDataArray;
         const sameDay = data.desc.sameDay;
         const sameMd5 = data.desc.sameMd5;
@@ -318,46 +435,63 @@ class Content extends React.Component {
                 timeChoose = timeDataArray[0].month;
             }
         }
+        console.log("height is ", height);
         return (
             <Row>
                 <Col span="24">
                     <Handle />
-                    <div className="index-left" style={{ height: height, overflowX: "hidden" }}>
+                    <div className="index-left" style={{ overflowX: "hidden" }}>
                         <Spin tip="Loading..." spinning={ui.isLoad.isLoadStatus} >
-                            <h1>对比人数：<span>{Object.keys(loadData).length}</span></h1>
+                            <h1>对比人数<span>{userNumberSize != 0 ? ` ${userNumberSize} ` : ""}</span></h1>
+                            <MonthLeftShow ref={"monthLeftShowRef"} userNumberSize={userNumberSize} timeDataArray={timeDataArray} />
                             <ul
                                 ref={"personsRef"}
                                 className="life-person"
-                                style={{ height: height - 41, maxHeight: height - 41, overflowX: "hidden" }}>
+                                style={{ height: height, maxHeight: height, overflowX: "hidden" }}>
                                 {Object.keys(loadData).map(key => {
                                     return (
                                         <PeoplePic pname={loadData[key].people.name}
-                                            index={loadData[key].people.userNumber}
+                                            userNumber={loadData[key].people.userNumber}
                                             key={key}
                                         />);
                                 })}
                             </ul>
                         </Spin>
                     </div>
-                    <div className="b-left">
+
+                    {/* <div className="b-left" style={{ height: BOTTOM_HEIGHT }}>
                         <div style={{ marginTop: 21 }}>
-                            <TimeSelect ref={"timeSelectRef"} timeDataArray={timeDataArray} changeTimeSelect={this.changeTimeSelect} />
-                        </div>
-                    </div>
+                                描述
+                         </div>
+                    </div> */}
+
                     <div className="collect">
-                        <Input.Search
+                        <Input
+                            ref={"userNumberInput"}
                             size="small"
                             placeholder="请输入证件号码"
-                            style={{ width: 200, margin: "0px 10px 0px 10px " }}
-                            onSearch={(value) => { if (!ui.isLoad.isLoadStatus) { addUser(value) } }}
+                            style={{ width: 160, margin: "0px 10px 0px 10px " }}
+                            onPressEnter={(e) => { if (!ui.isLoad.isLoadStatus) { addUser(e.target.value) } }}
                         />
-                        <Radio.Group value={data.filterData.radioValue} onChange={changeSameRadioFunc}>
+                        <Button type="primary" icon="search" size="small" onClick={
+                            () => { if (!ui.isLoad.isLoadStatus) { addUser(this.refs.userNumberInput.refs.input.value) } }
+                        }>添加</Button>
+                        <Radio.Group value={data.filterData.radioValue} onChange={changeSameRadioFunc} style={{ marginLeft: 15 }}>
                             <Radio value={"all"}><b className="all">所有</b></Radio>
                             <Radio value={"sameDay"}><b className="sameDay">同日</b></Radio>
-                            <Radio value={"same"}><b className="same">相同</b></Radio>
+                            <Radio value={"sameTwo"}><b className="sameTwo">两两相同</b></Radio>
+                            <Radio value={"sameAll"}><b className="sameAll">完全相同</b></Radio>
                         </Radio.Group>
                     </div>
 
+                    {userNumberSize == 0 ?
+                        null : (
+                            <div
+                                ref="timelineRef" className="collect-right" style={{ overflowX: "hidden" }} >
+                                <BaseTimeLine key="baseLine" timeDataArray={timeDataArray} sameDay={sameDay} sameMd5={sameMd5} />
+                            </div>
+                        )
+                    }
                     <div
                         className="life-view "
                         style={{ overflowY: "hidden" }}>
@@ -365,10 +499,12 @@ class Content extends React.Component {
                             <div
                                 ref={"personTraceRef"}
                                 style={{
-                                    minHeight: height - 41, maxHeight: height - 41,
+                                    minHeight: height,
+                                    maxHeight: height,
                                     overflowY: "hidden"
                                 }}>
                                 <PersonTaces
+                                    key="PersonTaces"
                                     data={data}
                                     height={height}
                                     showDetailFunc={showDetailFunc}
@@ -377,22 +513,25 @@ class Content extends React.Component {
                         </Spin>
                     </div>
                     <div
-                        className="b-right" ref="timelineRef" style={{ overflowX: "hidden" }} >
-                        {ui.showChart ?
-                            (<TraceChart userChartDataMonth={userChartDataMonth} />)
-                            :
-                            (<BaseTimeLine timeDataArray={timeDataArray} sameDay={sameDay} sameMd5={sameMd5} />)
-                        }
+                        className="b-right" style={{ overflowX: "hidden" }} >
+                        <Row gutter={4}>
+                            <Col span={12}>
+                                <TraceAnaylse />
+                            </Col>
+                            <Col span={12}>
+                                <HeatMap/>
+                            </Col>
+                        </Row>
+
                     </div>
                     <DetailOption />
                 </Col>
             </Row>
         )
     }
-
     //时间滚动条
-
 }
+//<TraceTable />
 
 
 function mapStateToProps(state) {
@@ -417,8 +556,8 @@ function mapDispatchToProps(dispatch) {
         // changeTimeSelect: (value) => {
         //     dispatch(Actions.changeTimeSelect(value));
         // },
-        showDetailFunc: () => {
-            dispatch(Actions.loadDetail())
+        showDetailFunc: (hbaseKey) => {
+            dispatch(Actions.loadDetail(hbaseKey))
         },
         // moveTimeScroller: (value) => {
         //     //dispatch(Actions.scrollerTimeLine(value));
@@ -428,6 +567,7 @@ function mapDispatchToProps(dispatch) {
         }
     }
 }
+
 //<Switch size="small" checked={ui.showChart} onChange={changeShowChart} />
 export default connect(mapStateToProps, mapDispatchToProps
 )(Content)

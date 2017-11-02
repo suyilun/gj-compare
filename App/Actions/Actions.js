@@ -86,21 +86,25 @@ function descSameMd5(getState, userTimeTypeDataArr) {
 }
 
 function timeArrayToTimeDataArray(allTimes) {
-    const daySortArray = allTimes.sort();
+    //console.log("allTimes",allTimes)
+    const daySortArray = allTimes.sort(function (a, b) { return b - a; });
     let nextTime; let nextMonth; let dayData = [];
     const timeDataArray = [];
     daySortArray.map((time, index) => {
-        time = String(time);
+        var timeStr = String(time);
         // console.log(index,time);
-        if (nextTime == undefined || nextTime.substr(0, 8) != time.substr(0, 8)) { //判断是不是新的一天或最后一天
+        if (nextTime == undefined || nextTime.substr(0, 8) != timeStr.substr(0, 8)) { //判断是不是新的一天或最后一天
             // let dayData = oneDay;
-            nextTime = time.substr(0, 8);
-            nextMonth = time.substr(0, 6);
+            nextTime = timeStr.substr(0, 8);
+            nextMonth = timeStr.substr(0, 6);
             dayData = [];
             timeDataArray.push({ month: nextMonth, day: nextTime, dayData: dayData })
         }
         //过滤type
-        dayData.push(time);
+        if (dayData.indexOf(time) == -1) {
+            dayData.push(time);
+        }
+
     })
     return timeDataArray;
 }
@@ -144,8 +148,11 @@ const filterByRadio = (radioValue, dayValue, md5Value, sameDay, sameMd5) => {
         case "all": return true;
         case "sameDay":
             return sameDay[dayValue] > 1;
-        case "same":
+        case "sameTwo":
             return sameMd5[md5Value] > 1;
+        case "sameAll":
+        //所有相同
+
         default: console.error("radio值有错误", radioValue);
     }
 }
@@ -166,7 +173,7 @@ const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDat
 
     const allTimeTypeData = []
     Object.keys(dataType).map(userNumberKey => {
-        if (userNumber != userNumberKey && dataType != 'timeDataArray') {
+        if (userNumber != userNumberKey && userNumberKey != 'timeDataArray') {
             const userTimeTypeDataArrInState = dataType[userNumberKey];
             userTimeTypeDataArrInState.map(
                 timeTypeData => {
@@ -228,7 +235,7 @@ const calculteSameDay = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
                         }
                     }
                 } else {
-                    console.err("state.desc.sameDay中不存在日期为：" + timeTypeData.day + "数据");
+                    console.error("state.desc.sameDay中不存在日期为：" + timeTypeData.day + "数据");
                 }
             }
         })
@@ -395,14 +402,16 @@ export function loadData(sfzh) {
         }
         //首次displaced：更新loadStatus 来加载进度条
         dispatch(isLoadWait(true));
-        //TODO:旧请求地址/fwzy/do/track/data
+        //TODO:旧请求地址
+        ///json/${sfzh}.json
+        ///fwzy/do/track/data
         console.log("getState()", getState())
         return axios.get(`/json/${sfzh}.json`,
             {
                 params: {
                     zjhm: sfzh,
                     kssj: getState().data.filterData.startTime.replace("-", "").replace("-", "") + "000000",
-                    jssj: getState().data.filterData.endTime.replace("-", "").replace("-", "") + "999999",
+                    jssj: String(getState().data.filterData.endTime).replace("-", "").replace("-", "") + "999999",
                     lx: getState().data.filterData.options.map((option) => {
                         return option.value
                     }).join(","),//'wb,lg,hc,ky,fj,zk,qt,yl'
@@ -410,47 +419,55 @@ export function loadData(sfzh) {
                 , responseType: "json"
             }
         ).then(function (response) {
-            console.log("异步获得的数据", response.data);
-            const radioValue = getState().data.filterData.radioValue;
             let userData = response.data;
-            let userNumber = userData.people.userNumber;
-            let userTraces = userData.content;
-            let userMd5Arr = []; let userDateMap = {}; let userTimeTypeDataArr = [];
-            //let userDateArr = [];
-            //用户时间类型数据
+            if (Object.keys(userData).length == 0) {
+                dispatch(notifyMsg("查找失败", `无此身份证${sfzh}档案，轨迹数据`))
+            } else {
+                let userNumber = userData.people.userNumber;
+                let userTraces = userData.content;
+                let userMd5Arr = []; let userDateMap = {}; let userTimeTypeDataArr = [];
+                //let userDateArr = [];
+                //用户时间类型数据
+                //let userTimeTypeData = { userNumber: userNumber, timeTypeData: [] };
+                userTraces.map((trace, index) => {
+                    //userDateArr.push(trace.traceTime);
+                    //如果是旅馆，需要进行拆分
+                    userMd5Arr.push(TraceCard.sameKeyGen(trace));
+                    //index-show  序号-是否显示
+                    userDateMap[trace.traceTime] = {
+                        index: index,
+                    };
+                    if (!trace.md5) {
+                        trace.md5 = TraceCard.sameKeyGen(trace);//生成MD5
+                    }
+                    //类型-时间-是否显示catg,time,show,sameKey,key判断是是否相同值
+                    userTimeTypeDataArr.push({
+                        time: trace.traceTime,
+                        day: String(trace.traceTime).substr(0, 8),
+                        catg: trace.catg,
+                        md5: trace.md5,
+                    })
+                });
+                //时间轴
+                dispatch(descDateTypeArr(getState, userNumber, userTimeTypeDataArr));
+                //合计
+                dispatch(descSumCatg(getState, userTimeTypeDataArr));//需要在descSameDay，descSameDay之前实现
+                //数据映射
+                dispatch(mapping(userNumber, userDateMap));
+                //同日
+                dispatch(descSameDay(getState, userTimeTypeDataArr));
+                //同md5
+                dispatch(descSameMd5(getState, userTimeTypeDataArr));
+                //数据存储
+                dispatch(AddData(userNumber, userData));
+            }
 
-            //let userTimeTypeData = { userNumber: userNumber, timeTypeData: [] };
-            userTraces.map((trace, index) => {
-                //userDateArr.push(trace.traceTime);
-                //如果是旅馆，需要进行拆分
-                userMd5Arr.push(TraceCard.sameKeyGen(trace));
-                //index-show  序号-是否显示
-                userDateMap[trace.traceTime] = {
-                    index: index,
-                };
-                if (!trace.md5) {
-                    trace.md5 = TraceCard.sameKeyGen(trace);//生成MD5
-                }
-                //类型-时间-是否显示catg,time,show,sameKey,key判断是是否相同值
-                userTimeTypeDataArr.push({
-                    time: trace.traceTime,
-                    day: String(trace.traceTime).substr(0, 8),
-                    catg: trace.catg,
-                    md5: trace.md5,
-                })
-            });
-            //时间轴
-            dispatch(descDateTypeArr(getState, userNumber, userTimeTypeDataArr));
-            //合计
-            dispatch(descSumCatg(getState, userTimeTypeDataArr));//需要在descSameDay，descSameDay之前实现
-            //数据映射
-            dispatch(mapping(userNumber, userDateMap));
-            //同日
-            dispatch(descSameDay(getState, userTimeTypeDataArr));
-            //同md5
-            dispatch(descSameMd5(getState, userTimeTypeDataArr));
-            //数据存储
-            dispatch(AddData(userNumber, userData));
+
+
+
+
+
+
             //图标数据
             // dispatch(
             //     {
@@ -463,7 +480,9 @@ export function loadData(sfzh) {
             console.log("更新后的state:", getState());
         })
             .catch(function (error) {
-                console.log(error);
+                console.error(error);
+                dispatch(isLoadWait(false));
+                dispatch(errorMsg(error.message));
             });
     }
 
@@ -554,8 +573,10 @@ function loadDetailData(data) {
 
 
 //加载详情
-export function loadDetail() {
+export function loadDetail(hbaseKey) {
     console.log("详情加载ajax....");
+    console.log(hbaseKey);
+    return false;
     return function (dispatch, getState) {
         //console.log(getState());//获取state getState是function 而getstate() 的结果是state
         //首次displaced：更新loadStatus 来加载进度条
@@ -568,6 +589,7 @@ export function loadDetail() {
                 dispatch(showDetail(true))
             })
             .catch(function (error) {
+                dispatch(isLoadWait(false));
                 console.log(error);
             });
     }
@@ -616,16 +638,17 @@ export function reGetTraces() {
     return (dispatch, getState) => {
         const loadData = getState().data.loadData;
         const userNumbers = Object.keys(loadData);
-        if (userNumbers.length == 0) {
-            dispatch(errorMsg("当前没有需要被搜证件号码！"));
-            return;
-        }
-        //TODO:旧请求地址/fwzy/do/track/data
+        // if (userNumbers.length == 0) {
+        //     dispatch(errorMsg("当前没有需要被搜证件号码！"));
+        //     return;
+        // }
+        //TODO:旧请求地址/fwzy/do/track/dataList
+        ///json/test.json
         dispatch(isLoadWait(true));
-        return axios.get(`/json/test.json`,
+        return axios.get(`/json/test2.json`,
             {
                 params: {
-                    zjhmArray: userNumbers,
+                    zjhms: userNumbers.join(","),
                     kssj: getState().data.filterData.startTime.replace("-", "").replace("-", "") + "000000",
                     jssj: getState().data.filterData.endTime.replace("-", "").replace("-", "") + "999999",
                     lx: getState().data.filterData.options.map((option) => {
@@ -674,6 +697,7 @@ export function reGetTraces() {
             dispatch(isLoadWait(false));
         }).catch(function (error) {
             console.log(error);
+            dispatch(isLoadWait(false));
             dispatch(errorMsg(error));
         });
 
@@ -829,6 +853,14 @@ function regetContent(personDataList) {
 function errorMsg(errorMsg) {
     return {
         type: ActionTypes.DATA.ERROR_MSG, errorMsg
+    }
+}
+
+function notifyMsg(notifyMsg, notifyDesc) {
+    return {
+        type: ActionTypes.DATA.NOTIFY_MSG,
+        notifyMsg,
+        notifyDesc
     }
 }
 

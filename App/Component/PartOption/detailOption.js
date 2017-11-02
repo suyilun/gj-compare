@@ -53,7 +53,7 @@ const DetailOptionShow = ({ showDetail, showFunc }) => (
 const TraceModal = ({ showDetail, showFunc }) => {
     return (
         <Modal visible={showDetail} title="ceshiceshi" onCancel={showFunc} footer={null}>
-            babababab
+           查看详情
         </Modal>
     );
 }

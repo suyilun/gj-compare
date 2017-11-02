@@ -3,13 +3,14 @@ import React from 'react';
 import * as Actions from '../../Actions/Actions';
 import { Row, Col, DatePicker, Button } from 'antd';
 import moment from 'moment';
+moment.locale('zh-cn');
 
 
 const Option = ({ ischeck, optionClass, optionName, checkOption, sumRows }) => (
     <li className={ischeck ? optionClass + ' life-check' : optionClass} onClick={checkOption}>
         <p href="javascript:;">
             <i></i>
-            <span>{optionName}({sumRows})</span>
+            <span>{optionName}{sumRows!=0?`(${sumRows})`:''}</span>
         </p>
     </li>
 )
@@ -20,16 +21,16 @@ class Head extends React.Component {
         let { topShow, filterData, sumCatg, setStartTime, setEndTime, checkOption, reGetTraces } = this.props;
         const { options, startTime, endTime, } = filterData;
         return (
-            <Row height="40px" className="top" style={{ display: topShow ? 'block' : 'none' }}>
+            <Row  className="top" style={{ display: topShow ? 'block' : 'none' }}>
                 <Col span="16">
                     <a href="javascript:;" className="logo">
-                        <img src="images/index-logo02.png"></img>
                     </a>
                     <ul className="life-class">
                         {
                             options.map((option, index) => {
                                 return (
                                     <Option
+                                        key={`option-${option.value}`}
                                         ischeck={option.ischeck}
                                         optionName={option.optionName}
                                         optionClass={option.optionClass}
@@ -44,8 +45,8 @@ class Head extends React.Component {
                     <div className={"searchAgain"}>
                         <DatePicker defaultValue={moment(startTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setStartTime(dateString) }} />
                         -
-                        <DatePicker defaultValue={moment(endTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setEndTime(dateString) }} />
-                        <Button icon="user" style={{ backgroundColor: "#fd6461" }} onClick={reGetTraces}>重新比对</Button>
+                         <DatePicker defaultValue={moment(endTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setEndTime(dateString) }} />
+                        <Button icon="user" type="primary" onClick={reGetTraces}>重新比对</Button>
                     </div>
                 </Col>
             </Row>
@@ -70,5 +71,7 @@ function mapDispatchToProps(dispatch) {
         },
     }
 }
-export default connect(mapStateToProps, mapDispatchToProps)(Head)
+
+export default connect(mapStateToProps, mapDispatchToProps
+)(Head)
 

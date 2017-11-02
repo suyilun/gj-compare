@@ -1,20 +1,20 @@
 import * as Actions from '../../Actions/Actions';
 import React from 'react';
-import {connect} from 'react-redux'
+import { connect } from 'react-redux'
 
-const PeopleShow = ({pname,cancel,index})=>(
-    <li><a href="javascript:;">
+const PeopleShow = ({ pname, cancel, userNumber }) => (
+    <li className={"userPic"}>
         <p>
             {/*<img src="images/demo_header.png"></img>*/}
-            <img src={"/big-data-interface/zhaopian/A"+index}></img>
+            <img src={`http://10.119.125.149:18080/big-data-interface/zhaopian/A${userNumber}`}></img>
             <strong>{pname}</strong>
         </p>
-        <b>{index}</b>
-        <i onClick={()=>{cancel(index)}}>
+        <a href={`http://10.119.125.149/do/ry?zjhm=A${userNumber}`} target="_blank">{userNumber}</a>
+        <i onClick={() => { cancel(userNumber) }}>
             <span className="life-tb"></span>
             <span className="life-lr"></span>
         </i>
-    </a></li>
+    </li>
 )
 
 class PeoplePic extends React.Component {
@@ -25,29 +25,29 @@ class PeoplePic extends React.Component {
     }
 
     render() {
-        let {pname,cancel,index} = this.props;
+        let { pname, cancel, userNumber } = this.props;
         console.log("开始渲染People")
         return (
-             <PeopleShow pname={pname}
-                         index={index}
-                         cancel={cancel}
-             />
+            <PeopleShow pname={pname}
+                userNumber={userNumber}
+                cancel={cancel}
+            />
         );
     }
 }
-function mapStateToProps(){
-    return{
+function mapStateToProps() {
+    return {
 
     }
 }
 function mapDispatchToProps(dispatch) {
-    return{
-        cancel:(data)=>{
-                        console.log("data---",data);
-                        dispatch(Actions.dataCancel(data))
-             }
+    return {
+        cancel: (data) => {
+            console.log("data---", data);
+            dispatch(Actions.dataCancel(data))
+        }
     }
 }
 
 
-export default connect(mapStateToProps,mapDispatchToProps)(PeoplePic)
+export default connect(mapStateToProps, mapDispatchToProps)(PeoplePic)

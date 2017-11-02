@@ -10,7 +10,6 @@ const HandleShow = ({show,func}) => (
     </a>
 );
 
-
 class Handle extends React.Component {
   constructor(props) {
     super(props);

@@ -7,8 +7,8 @@ import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import { AppContainer } from 'react-hot-loader';
 require("./app.less");
-require("./index.html");
-
+require("./index.css");
+// require("./index.html");
 // const configureStore = () => {
 //     const store = createStore(rootReducer, applyMiddleware(thunkMiddleware))
 //     if (process.env.NODE_ENV !== "production") {
@@ -21,11 +21,11 @@ require("./index.html");
 //     }
 //     return store;
 // }
-
 // const store = configureStore()
 //const store = ;
-
+//
 const renderApp = Component => {
+    if (process.env.NODE_ENV !== "production") {
     ReactDOM.render(
         <Provider store={createStore(rootReducer, applyMiddleware(thunkMiddleware))}>
            <AppContainer>
@@ -33,10 +33,19 @@ const renderApp = Component => {
             </AppContainer>
         </Provider>,
         document.getElementById("app")
-    );
+    );}else{
+        ReactDOM.render(
+            <Provider store={createStore(rootReducer, applyMiddleware(thunkMiddleware))}>
+                <Component />
+            </Provider>,
+            document.getElementById("app")
+        );
+    }
 }
 
-renderApp(AppLayouts);
+renderApp(AppLayouts)
+
+
 
 if (process.env.NODE_ENV !== "production") {
     if (module.hot) {
