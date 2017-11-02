@@ -19,7 +19,7 @@ import PeoplePic from '../PartOption/peoplePic';
 import PeopleTraceList from '../PartOption/PeopleTraceList';
 import OneDayIndex from '../PartOption/oneDayIndexOption';
 import DetailOption from '../PartOption/detailOption';
-import HeatMap  from '../HeatMap/HeatMap.js';
+import HeatMap from '../HeatMap/HeatMap.js';
 // import 'react-vis/dist/style.css';
 
 const BASELINE_HEIGHT = 35;
@@ -202,7 +202,7 @@ const TraceAnaylse = () => {
                     // ...and so on
                 ]}
             />
-            
+
         </div>
     )
 }
@@ -271,7 +271,7 @@ const TraceTable = () => {
             key: '6', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
         },
     ];
-    return (<Table scroll={{ y: BOTTOM_HEIGHT-45 }} columns={columns} dataSource={data} size="small" pagination={false} />)
+    return (<Table scroll={{ y: BOTTOM_HEIGHT - 45 }} columns={columns} dataSource={data} size="small" pagination={false} />)
 }
 
 
@@ -513,13 +513,17 @@ class Content extends React.Component {
                         </Spin>
                     </div>
                     <div
-                        className="b-right" style={{ overflowX: "hidden" }} >
-                        <Row gutter={4}>
+                        className="b-right" height={BOTTOM_HEIGHT} style={{ overflowX: "hidden" }} >
+                        <Row gutter={4} height={BOTTOM_HEIGHT}>
                             <Col span={12}>
                                 <TraceAnaylse />
+                                1
+                                2
+                                2
+                                2
                             </Col>
                             <Col span={12}>
-                                <HeatMap/>
+                                <HeatMap />
                             </Col>
                         </Row>
 
