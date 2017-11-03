@@ -202,83 +202,92 @@ const TraceAnaylse = () => {
                     // ...and so on
                 ]}
             />
-
         </div>
     )
 }
 
+const TraceTable = ({ loadData }) => {
+    const userNumbers = Object.keys(loadData);
+    if (userNumbers.length == 0) {
+        return null;
+    } else {
+        const columns = [{
+            title: '姓名',
+            width: '10%',
+            dataIndex: 'name',
+        }, {
+            title: '旅馆',
+            width: '10%',
+            dataIndex: 'lg',
+        }, {
+            title: '飞机',
+            width: '10%',
+            dataIndex: 'fj',
+        },
+        {
+            title: '火车',
+            width: '10%',
+            dataIndex: 'hc',
+        },
+        {
+            title: '客运',
+            width: '10%',
+            dataIndex: 'ly',
+        },
+        {
+            title: '医疗',
+            width: '10%',
+            dataIndex: 'yl',
+        },
+        {
+            title: '暂口',
+            width: '10%',
+            dataIndex: 'zk',
+        },
+        {
+            title: '网吧',
+            width: '10%',
+            dataIndex: 'wb',
+        },
+        {
+            title: '其他',
+            width: '10%',
+            dataIndex: 'qt',
+        },];
+        const data = [];
+        userNumbers.map(userNumber => {
+            const user = { key: userNumber, name: loadData[userNumber].people.name };
+            loadData[userNumber].content.map((trace) => {
+                if (typeof user[trace.catg] == 'undefined') {
+                    user[trace.catg] = 0;
+                }
+                user[trace.catg] = user[trace.catg] + 1;
+            })
+            data.push(user);
+        });
 
-const TraceTable = () => {
-    const columns = [{
-        title: 'Name',
-        dataIndex: 'name',
-    }, {
-        title: '旅馆',
-        dataIndex: 'lg',
-    }, {
-        title: '飞机',
-        dataIndex: 'fj',
-    },
-    {
-        title: '火车',
-        dataIndex: 'hc',
-    },
-    {
-        title: '客运',
-        dataIndex: 'ly',
-    },
-    {
-        title: '医疗',
-        dataIndex: 'yl',
-    },
-    {
-        title: '暂口',
-        dataIndex: 'zk',
-    },
-    {
-        title: '网吧',
-        dataIndex: 'wb',
-    },
-    {
-        title: '其他',
-        dataIndex: 'qt',
-    },
-
-    ];
-    const data = [
-        {
-            name: "测试",
-            key: '1', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
-        },
-        {
-            name: "测试",
-            key: '2', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
-        },
-        {
-            name: "测试",
-            key: '3', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
-        },
-        {
-            name: "测试",
-            key: '4', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
-        },
-        {
-            name: "测试",
-            key: '5', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
-        },
-        {
-            name: "测试",
-            key: '6', lg: 10, wb: 10, fj: 20, ky: 11, yl: 12, zk: 4, qt: 0
-        },
-    ];
-    return (<Table scroll={{ y: BOTTOM_HEIGHT - 45 }} columns={columns} dataSource={data} size="small" pagination={false} />)
+        return (
+            <Table
+                scroll={{ y: BOTTOM_HEIGHT - 45 }}
+                columns={columns}
+                dataSource={data}
+                size="small"
+                pagination={false} />
+        );
+    }
 }
 
-
-const BaseTimeLine = ({ timeDataArray, sameDay, sameMd5 }) => {
+const BaseTimeLine = ({ userNumberSize, timeDataArray, sameDay, sameMd5 }) => {
     const timeTokens = [];
     timeDataArray.map((timeData => {
-        timeTokens.push(<OneDayIndex key={`${timeData.day}`} day={timeData.day} dayData={timeData.dayData} sameDay={sameDay} sameMd5={sameMd5} />);
+        timeTokens.push(<OneDayIndex
+            key={`${timeData.day}`}
+            day={timeData.day}
+            dayData={timeData.dayData}
+            sameDay={sameDay}
+            sameMd5={sameMd5}
+            userNumberSize={userNumberSize}
+        />);
     }))
     return (
         <div className="life-time-contant max-content">
@@ -286,7 +295,8 @@ const BaseTimeLine = ({ timeDataArray, sameDay, sameMd5 }) => {
             <div className="life-today life-end">
                 <span className="today-time life-radius"><b>End</b></span>
             </div>
-        </div>);
+        </div>
+    );
 };
 
 class Content extends React.Component {
@@ -376,7 +386,7 @@ class Content extends React.Component {
                 break;
             }
         }
-        this.refs.timeSelectRef.setState({ nowMonth });
+        //this.refs.timeSelectRef.setState({ nowMonth });
         this.refs.monthLeftShowRef.setState({ nowMonth })
     }
 
@@ -392,6 +402,10 @@ class Content extends React.Component {
         console.log("changeTimeSelect:", nowMonth, scrollerWidth, this.timePosition)
         this.refs.personTraceRef.scrollLeft = scrollerWidth;
         this.refs.timelineRef.scrollLeft = scrollerWidth;
+    }
+
+    clickHeatMap = (heatDay) => {
+
     }
 
     componentDidMount() {
@@ -423,7 +437,6 @@ class Content extends React.Component {
             //有用户，出现日期条
             height = height - BASELINE_HEIGHT;
         }
-
 
         const timeDataArray = data.desc.date_type.timeDataArray;
         const sameDay = data.desc.sameDay;
@@ -488,7 +501,13 @@ class Content extends React.Component {
                         null : (
                             <div
                                 ref="timelineRef" className="collect-right" style={{ overflowX: "hidden" }} >
-                                <BaseTimeLine key="baseLine" timeDataArray={timeDataArray} sameDay={sameDay} sameMd5={sameMd5} />
+                                <BaseTimeLine
+                                    key="baseLine"
+                                    timeDataArray={timeDataArray}
+                                    sameDay={sameDay}
+                                    sameMd5={sameMd5}
+                                    userNumberSize={userNumberSize}
+                                />
                             </div>
                         )
                     }
@@ -513,20 +532,15 @@ class Content extends React.Component {
                         </Spin>
                     </div>
                     <div
-                        className="b-right" height={BOTTOM_HEIGHT} style={{ overflowX: "hidden" }} >
-                        <Row gutter={4} height={BOTTOM_HEIGHT}>
-                            <Col span={12}>
-                                <TraceAnaylse />
-                                1
-                                2
-                                2
-                                2
+                        className="b-right" style={{ overflowX: "hidden", height: BOTTOM_HEIGHT }} >
+                        <Row gutter={4} >
+                            <Col span={12} style={{ height: BOTTOM_HEIGHT }}>
+                                <TraceTable loadData={loadData} />
                             </Col>
-                            <Col span={12}>
+                            <Col span={12} style={{ boxShadow: '-6px 0 6px -4px rgba(0,0,0,.2)' }}>
                                 <HeatMap />
                             </Col>
                         </Row>
-
                     </div>
                     <DetailOption />
                 </Col>
@@ -535,8 +549,8 @@ class Content extends React.Component {
     }
     //时间滚动条
 }
-//<TraceTable />
-
+//
+//<TraceAnaylse />
 
 function mapStateToProps(state) {
     return {

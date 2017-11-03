@@ -11,7 +11,7 @@ const WebpackBundleSizeAnalyzerPlugin = require('webpack-bundle-size-analyzer').
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const config = {
-    //devtool: 'source-map',//编译速度会慢
+    devtool: 'source-map',//编译速度会慢
     //devtool:"cheap-eval-source-map",
     entry: {
         app: [

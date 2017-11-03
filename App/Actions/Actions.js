@@ -124,35 +124,36 @@ const calculteTimeDataArrayByChangeOptionAndRadio = (getState, optValue, optChec
             return n == optValue;
         })
     }
-    Object.keys(dateType).map(userNumberKey => {
-        if (userNumberKey != 'timeDataArray') {
-            const timeTypeDataArrInState = dateType[userNumberKey];
-            timeTypeDataArrInState.map(
-                timeTypeData => {
-                    //没有过滤操作
-                    if (showTypes.indexOf(timeTypeData.catg) != -1) {
-                        if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5)) {
-                            allTimes.push(timeTypeData.time);
-                        }
+    const userNumbersInState = Object.keys(dateType).filter(item => { return item != 'timeDataArray' });
+    userNumbersInState.map(userNumberKey => {
+        const timeTypeDataArrInState = dateType[userNumberKey];
+        timeTypeDataArrInState.map(
+            timeTypeData => {
+                //没有过滤操作
+                if (showTypes.indexOf(timeTypeData.catg) != -1) {
+                    if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5, userNumbersInState.length)) {
+                        allTimes.push(timeTypeData.time);
                     }
                 }
-            )
-        }
+            }
+        )
     });
     return timeArrayToTimeDataArray(allTimes);
 
 }
 
-const filterByRadio = (radioValue, dayValue, md5Value, sameDay, sameMd5) => {
+const filterByRadio = (radioValue, dayValue, md5Value, sameDay, sameMd5, userNumberSize) => {
+    // console.log("md5Value, ", md5Value);
     switch (radioValue) {
         case "all": return true;
         case "sameDay":
             return sameDay[dayValue] > 1;
         case "sameTwo":
-            return sameMd5[md5Value] > 1;
+            let sameTwo = typeof sameMd5[md5Value] != 'undefined';
+            return sameTwo ? sameMd5[md5Value].count > 1 : false;
         case "sameAll":
-        //所有相同
-
+            //所有相同
+            return typeof sameMd5[md5Value] != 'undefined' ? sameMd5[md5Value].count == userNumberSize : false;
         default: console.error("radio值有错误", radioValue);
     }
 }
@@ -161,7 +162,6 @@ const filterByRadio = (radioValue, dayValue, md5Value, sameDay, sameMd5) => {
 // optValue, optCheck
 // optValue, optCheck, radioValue
 const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDataArr, isDeleteUser = false) => {
-
     const dataType = getState().data.desc.date_type;
     const filterData = getState().data.filterData;
     const radioValue = filterData.radioValue;
@@ -171,9 +171,10 @@ const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDat
     const sameDay = calculteSameDay(getState, userTimeTypeDataArr, isDeleteUser);
     const sameMd5 = calculteSameMd5(getState, userTimeTypeDataArr, isDeleteUser);
 
-    const allTimeTypeData = []
-    Object.keys(dataType).map(userNumberKey => {
-        if (userNumber != userNumberKey && userNumberKey != 'timeDataArray') {
+    const allTimeTypeData = [];
+    const userNumbersInState = Object.keys(dataType).filter(item => { return item != 'timeDataArray' });
+    userNumbersInState.map(userNumberKey => {
+        if (userNumber != userNumberKey) {
             const userTimeTypeDataArrInState = dataType[userNumberKey];
             userTimeTypeDataArrInState.map(
                 timeTypeData => {
@@ -194,10 +195,17 @@ const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDat
     });
 
     const allTimes = allTimeTypeData.filter((timeTypeData) => {
-        return (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5));
+        return (
+            filterByRadio(
+                radioValue,
+                timeTypeData.day,
+                timeTypeData.md5,
+                sameDay,
+                sameMd5,
+                isDeleteUser ? userNumbersInState.length : userNumbersInState.length + 1));
     }).map((itemTypeData) => {
         return itemTypeData.time;
-    })
+    });
 
     return timeArrayToTimeDataArray(allTimes);
 }
@@ -240,6 +248,9 @@ const calculteSameDay = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
             }
         })
     }
+    if (userTimeTypeDataArr.length == 0) {
+        return {}
+    }
     return sameDay;
 }
 
@@ -251,9 +262,9 @@ const calculteSameMd5 = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
         //新增用户
         userTimeTypeDataArr.map(timeTypeData => {
             if (typeof sameMd5[timeTypeData.md5] == "undefined") {
-                sameMd5[timeTypeData.md5] = 1;
+                sameMd5[timeTypeData.md5] = { count: 1, day: timeTypeData.day };
             } else {
-                sameMd5[timeTypeData.md5] = sameMd5[timeTypeData.md5] + 1;
+                sameMd5[timeTypeData.md5].count = sameMd5[timeTypeData.md5].count + 1;
             }
         })
     } else {
@@ -261,13 +272,16 @@ const calculteSameMd5 = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
             if (typeof sameMd5[timeTypeData.md5] == "undefined") {
                 console.log("md5 键不存在" + timeTypeData.md5);
             } else {
-                if (sameMd5[timeTypeData.md5] == 1) {
+                if (sameMd5[timeTypeData.md5].count == 1) {
                     delete sameMd5[timeTypeData.md5];
                 } else {
-                    sameMd5[timeTypeData.md5] = sameMd5[timeTypeData.md5] - 1;
+                    sameMd5[timeTypeData.md5].count = sameMd5[timeTypeData.md5].count - 1;
                 }
             }
         })
+    }
+    if (isDeleteUser && userTimeTypeDataArr.length == 0) {
+        return {};
     }
     return sameMd5;
 }
@@ -276,14 +290,15 @@ const calculteSameMd5 = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
 const calculteCatgSum = (getState, userTimeTypeDataArr, isDeleteUser = false) => {
     const sumCatg = _.cloneDeep(getState().data.desc.sumCatg);
     const radioValue = getState().data.filterData.radioValue;
-
+    const dataType = getState().data.desc.date_type;
     const sameDay = calculteSameDay(getState, userTimeTypeDataArr, isDeleteUser);
     const sameMd5 = calculteSameMd5(getState, userTimeTypeDataArr, isDeleteUser);
 
+    const userNumbersInState = Object.keys(dataType).filter(item => { return item != 'timeDataArray' });
     if (!isDeleteUser) {
         //新增用户
         userTimeTypeDataArr.map(timeTypeData => {
-            if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5)) {
+            if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5, userNumbersInState.length + 1)) {
                 if (typeof sumCatg[timeTypeData.catg] == 'undefined') {
                     sumCatg[timeTypeData.catg] = 1;
                 } else {
@@ -293,7 +308,7 @@ const calculteCatgSum = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
         })
     } else {
         userTimeTypeDataArr.map(timeTypeData => {
-            if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5)) {
+            if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5, userNumbersInState.length)) {
                 if (typeof sumCatg[timeTypeData.catg] == 'undefined') {
                     sumCatg[timeTypeData.catg] = 0;
                 } else {
@@ -301,6 +316,9 @@ const calculteCatgSum = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
                 }
             }
         })
+    }
+    if (isDeleteUser && userTimeTypeDataArr.length == 0) {
+        return {};
     }
     return sumCatg;
 }
@@ -313,19 +331,18 @@ const calculteCatgSumRadioChange = (getState, radioValue) => {
     const sameDay = getState().data.desc.sameDay;//{day:{timer:1}}对象
     //const filterData = getState().data.filterData;
     const sumCatg = {};
-    Object.keys(dateType).map(userNumberKey => {
-        if (userNumberKey != 'timeDataArray') {
-            const timeTypeDataArrInState = dateType[userNumberKey];
-            timeTypeDataArrInState.map(timeTypeData => {
-                if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5)) {
-                    if (typeof sumCatg[timeTypeData.catg] == 'undefined') {
-                        sumCatg[timeTypeData.catg] = 1;
-                    } else {
-                        sumCatg[timeTypeData.catg] = sumCatg[timeTypeData.catg] + 1;
-                    }
+    const userNumbersInState = Object.keys(dateType).filter(item => { return item != 'timeDataArray' });
+    userNumbersInState.map(userNumberKey => {
+        const timeTypeDataArrInState = dateType[userNumberKey];
+        timeTypeDataArrInState.map(timeTypeData => {
+            if (filterByRadio(radioValue, timeTypeData.day, timeTypeData.md5, sameDay, sameMd5, userNumbersInState.length)) {
+                if (typeof sumCatg[timeTypeData.catg] == 'undefined') {
+                    sumCatg[timeTypeData.catg] = 1;
+                } else {
+                    sumCatg[timeTypeData.catg] = sumCatg[timeTypeData.catg] + 1;
                 }
-            })
-        }
+            }
+        })
     })
     return sumCatg;
 }
@@ -364,7 +381,6 @@ function deleteDescDateTypeArr(getState, userNumber) {
         timeDataArray,
     }
 }
-
 
 
 function AddData(userNumber, userData) {
@@ -461,11 +477,6 @@ export function loadData(sfzh) {
                 //数据存储
                 dispatch(AddData(userNumber, userData));
             }
-
-
-
-
-
 
 
             //图标数据
@@ -762,11 +773,11 @@ const calculteSameMd5ByReget = (userDateTypeMap) => {
         let userHasMd5 = {};
         userTimeTypeDataArr.map(userTimeTypeData => {
             if (typeof sameMd5[userTimeTypeData.md5] == 'undefined') {
-                sameMd5[userTimeTypeData.md5] = 1;
+                sameMd5[userTimeTypeData.md5] = { count: 1, day: userTimeTypeData.day };
                 userHasMd5[userTimeTypeData.md5] = 1;
             } else {
                 if (!userHasMd5[userTimeTypeData.md5]) {
-                    sameMd5[userTimeTypeData.md5] = sameMd5[userTimeTypeData.md5] + 1;
+                    sameMd5[userTimeTypeData.md5].count = sameMd5[userTimeTypeData.md5].count + 1;
                 }
             }
         })

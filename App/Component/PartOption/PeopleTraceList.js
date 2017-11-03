@@ -41,8 +41,8 @@ class PeopleTraceList extends React.Component {
                     //
                     // }
                     //这里有一个问题
-                    let isSameMd5 = sameMd5[trace.md5] ? sameMd5[trace.md5] > 1 : false;
-                    let isSameAll = sameMd5[trace.md5] ? sameMd5[trace.md5] == userSizes : false;
+                    let isSameMd5 = sameMd5[trace.md5] ? sameMd5[trace.md5].count > 1 : false;
+                    let isSameAll = sameMd5[trace.md5] ? sameMd5[trace.md5].count == userSizes : false;
                     if (userSizes == 1) {
                         isSameMd5 = false;
                         isSameAll = false;
