@@ -2,7 +2,7 @@ import _ from 'lodash';
 import ActionTypes from '../Actions/ActionTypes';
 import TraceCard from '../Component/PartOption/TraceCard';
 import axios from 'axios';
-import { Message,notification } from 'antd';
+import { Message, notification } from 'antd';
 import moment from 'moment';
 
 const data = (state = {}, action) => {
@@ -20,7 +20,7 @@ const data = (state = {}, action) => {
 
 const initFilter = () => {
     const date = new Date();
-    let nowTime=new Date();
+    let nowTime = new Date();
     //nowTime.setMonth(nowTime.getMonth()-1);
     return {
         startTime: date.getFullYear() + "-01-01",
@@ -35,7 +35,7 @@ const initFilter = () => {
 
 
 //加载数据是选出相同的MD5和date
-function desc(descInState = { sameDay: {}, sameMd5: {}, date_type: { timeDataArray: [] }, sumCatg: {} }, action) {
+function desc(descInState = { sameDay: {}, sameMd5: {}, date_type: { timeDataArray: [], analyseDays: {} }, sumCatg: {} }, action) {
     return {
         sameDay: sameDayFun(descInState.sameDay, action),
         sameMd5: sameMd5Fun(descInState.sameMd5, action),
@@ -82,20 +82,20 @@ function sumCatgFun(state, action) {
 
 //data_type={身份证:时间数据,timeDataArray:时间轴}
 function date_type(state, action) {
-    const { userNumber, userTimeTypeDataArr, timeDataArray } = action;
+    const { userNumber, userTimeTypeDataArr, timeDataArray, analyseDays } = action;
     switch (action.type) {
         case ActionTypes.DATA.DATE_TYPE_COLLECTOR:
-            return Object.assign(state, { [userNumber]: userTimeTypeDataArr }, { timeDataArray });
+            return Object.assign(state, { [userNumber]: userTimeTypeDataArr }, { timeDataArray, analyseDays });
         case ActionTypes.DATA.DATE_TYPE_DELETE:
             const stateClone = _.cloneDeep(state);
             delete stateClone[userNumber];
-            return Object.assign(stateClone, { timeDataArray });
+            return Object.assign(stateClone, { timeDataArray, analyseDays });
         case ActionTypes.OPTION.CHANGE_CHECK:
         case ActionTypes.FILTER.RADIO_CHANGE:
-            return Object.assign({}, state, { timeDataArray });
+            return Object.assign({}, state, { timeDataArray, analyseDays });
         case ActionTypes.DATA.DATA_DATETYPE_REGET:
             const { userDateTypeMap } = action;//userDateTypeMap为 身份证：时间类型数组
-            return Object.assign({}, state, userDateTypeMap, { timeDataArray })
+            return Object.assign({}, state, userDateTypeMap, { timeDataArray, analyseDays })
         default: return state;
     }
 }
@@ -193,14 +193,14 @@ const filterData = (filterInState = initFilter(), action) => {
 function error(errorInState = {}, action) {
     const { type, errorMsg } = action;
     switch (type) {
-        case ActionTypes.DATA.ERROR_MSG: Message.error(errorMsg);return;
+        case ActionTypes.DATA.ERROR_MSG: Message.error(errorMsg); return;
         case ActionTypes.DATA.NOTIFY_MSG:
-            const {notifyDesc,notifyMsg}=action;
+            const { notifyDesc, notifyMsg } = action;
             notification["warning"]({
-            message:notifyMsg,
-            description:notifyDesc,
-        });
-            return ;
+                message: notifyMsg,
+                description: notifyDesc,
+            });
+            return;
     }
 }
 

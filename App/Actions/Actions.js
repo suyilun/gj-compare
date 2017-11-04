@@ -124,7 +124,7 @@ const calculteTimeDataArrayByChangeOptionAndRadio = (getState, optValue, optChec
             return n == optValue;
         })
     }
-    const userNumbersInState = Object.keys(dateType).filter(item => { return item != 'timeDataArray' });
+    const userNumbersInState = Object.keys(dateType).filter(item => { return !(item == 'timeDataArray' || item == 'analyseDays') });
     userNumbersInState.map(userNumberKey => {
         const timeTypeDataArrInState = dateType[userNumberKey];
         timeTypeDataArrInState.map(
@@ -153,29 +153,68 @@ const filterByRadio = (radioValue, dayValue, md5Value, sameDay, sameMd5, userNum
             return sameTwo ? sameMd5[md5Value].count > 1 : false;
         case "sameAll":
             //所有相同
+            if (userNumberSize == 1) {
+                return false;
+            }
             return typeof sameMd5[md5Value] != 'undefined' ? sameMd5[md5Value].count == userNumberSize : false;
         default: console.error("radio值有错误", radioValue);
     }
 }
 
+
+const calculteAnalyseDays = (sameDay, sameMd5, userSize) => {
+    const analyseDays = {}
+    Object.keys(sameDay).map(dayInSameDay => {
+        if (sameDay[dayInSameDay] == 1) {
+            //有轨迹为1
+            analyseDays[dayInSameDay] = 1;
+        } else {
+            //相同为2
+            analyseDays[dayInSameDay] = 2;
+        }
+
+    })
+    if (userSize != 1) {
+        Object.keys(sameMd5).filter(md5 => {
+            //md5
+            const item = sameMd5[md5];
+            if (item.count > 1 && item.count < userSize) {
+                //两两相同为3
+                analyseDays[item.day] = 3;
+            }
+            else if (item.count == userSize) {
+                //完全相同为4
+                analyseDays[item.day] = 4;
+            } else {
+                console.error("md5计算时间格子有异常", item)
+            }
+        });
+    }
+    return analyseDays;
+}
+
 //用户添加删除
-// optValue, optCheck
-// optValue, optCheck, radioValue
 const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDataArr, isDeleteUser = false) => {
-    const dataType = getState().data.desc.date_type;
+    const dateType = getState().data.desc.date_type;
     const filterData = getState().data.filterData;
     const radioValue = filterData.radioValue;
     //加入 radioValue属性
     const showTypes = filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value });
     //重新计算sameDay
     const sameDay = calculteSameDay(getState, userTimeTypeDataArr, isDeleteUser);
+    //计算相同md5日
     const sameMd5 = calculteSameMd5(getState, userTimeTypeDataArr, isDeleteUser);
+    const userNumbersInState = Object.keys(dateType).filter(item => { return !(item == 'timeDataArray' || item == 'analyseDays') });
+    //对比的人数
+    let userSize = isDeleteUser ? userNumbersInState.length - 1 : userNumbersInState.length + 1;
+    //分析所有的日期情况
+
+    const analyseDays = calculteAnalyseDays(sameDay, sameMd5, userSize);
 
     const allTimeTypeData = [];
-    const userNumbersInState = Object.keys(dataType).filter(item => { return item != 'timeDataArray' });
     userNumbersInState.map(userNumberKey => {
         if (userNumber != userNumberKey) {
-            const userTimeTypeDataArrInState = dataType[userNumberKey];
+            const userTimeTypeDataArrInState = dateType[userNumberKey];
             userTimeTypeDataArrInState.map(
                 timeTypeData => {
                     //没有过滤操作
@@ -206,9 +245,11 @@ const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDat
     }).map((itemTypeData) => {
         return itemTypeData.time;
     });
-
-    return timeArrayToTimeDataArray(allTimes);
+    const timeDataArray = timeArrayToTimeDataArray(allTimes)
+    return { timeDataArray, analyseDays };
 }
+
+
 
 
 //计算同一天
@@ -290,11 +331,10 @@ const calculteSameMd5 = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
 const calculteCatgSum = (getState, userTimeTypeDataArr, isDeleteUser = false) => {
     const sumCatg = _.cloneDeep(getState().data.desc.sumCatg);
     const radioValue = getState().data.filterData.radioValue;
-    const dataType = getState().data.desc.date_type;
+    const dateType = getState().data.desc.date_type;
     const sameDay = calculteSameDay(getState, userTimeTypeDataArr, isDeleteUser);
     const sameMd5 = calculteSameMd5(getState, userTimeTypeDataArr, isDeleteUser);
-
-    const userNumbersInState = Object.keys(dataType).filter(item => { return item != 'timeDataArray' });
+    const userNumbersInState = Object.keys(dateType).filter(item => { return !(item == 'timeDataArray' || item == 'analyseDays') });
     if (!isDeleteUser) {
         //新增用户
         userTimeTypeDataArr.map(timeTypeData => {
@@ -331,7 +371,7 @@ const calculteCatgSumRadioChange = (getState, radioValue) => {
     const sameDay = getState().data.desc.sameDay;//{day:{timer:1}}对象
     //const filterData = getState().data.filterData;
     const sumCatg = {};
-    const userNumbersInState = Object.keys(dateType).filter(item => { return item != 'timeDataArray' });
+    const userNumbersInState = Object.keys(dateType).filter(item => { return !(item == 'timeDataArray' || item == 'analyseDays') });
     userNumbersInState.map(userNumberKey => {
         const timeTypeDataArrInState = dateType[userNumberKey];
         timeTypeDataArrInState.map(timeTypeData => {
@@ -364,21 +404,23 @@ function deleteDescSumCatg(getState, timeTypeDataArr) {
 }
 
 function descDateTypeArr(getState, userNumber, userTimeTypeDataArr) {
-    const timeDataArray = calculteTimeDataArrayByUserChange(getState, userNumber, userTimeTypeDataArr);
+    const { timeDataArray, analyseDays } = calculteTimeDataArrayByUserChange(getState, userNumber, userTimeTypeDataArr);
     return {
         type: ActionTypes.DATA.DATE_TYPE_COLLECTOR,
         userNumber,
         userTimeTypeDataArr,
         timeDataArray,
+        analyseDays,
     }
 }
 
 function deleteDescDateTypeArr(getState, userNumber) {
-    const timeDataArray = calculteTimeDataArrayByUserChange(getState, userNumber, [], true);
+    const { timeDataArray, analyseDays } = calculteTimeDataArrayByUserChange(getState, userNumber, [], true);
     return {
         type: ActionTypes.DATA.DATE_TYPE_DELETE,
         userNumber,
         timeDataArray,
+        analyseDays
     }
 }
 
@@ -477,8 +519,6 @@ export function loadData(sfzh) {
                 //数据存储
                 dispatch(AddData(userNumber, userData));
             }
-
-
             //图标数据
             // dispatch(
             //     {
@@ -496,7 +536,6 @@ export function loadData(sfzh) {
                 dispatch(errorMsg(error.message));
             });
     }
-
 }
 
 function deleteMapping(userNumber) {
@@ -695,6 +734,8 @@ export function reGetTraces() {
             const sameDay = calculteSameDayByReget(userDateTypeMap);
             const sameMd5 = calculteSameMd5ByReget(userDateTypeMap);
 
+            const analyseDays = calculteAnalyseDays(sameDay, sameMd5, personDataList.length);
+
             dispatch(regetDescSameDay(sameDay));
             dispatch(regetDescSameMd5(sameMd5));
             //分析数据 mapping数据
@@ -703,7 +744,7 @@ export function reGetTraces() {
             dispatch(regetContent(personDataList));
             //合计
             dispatch(regetDescSumCatg(getState, userDateTypeMap, sameDay, sameMd5));
-            dispatch(regetDescDateTypeArr(getState, userDateTypeMap, sameDay, sameMd5));
+            dispatch(regetDescDateTypeArr(getState, analyseDays, userDateTypeMap, sameDay, sameMd5));
             //数据存储
             dispatch(isLoadWait(false));
         }).catch(function (error) {
@@ -718,13 +759,13 @@ export function reGetTraces() {
 
 //计算时间轴
 const calculteTimeDataArrayByReget = (getState, userDateTypeMap, sameDay, sameMd5) => {
-    const dataType = userDateTypeMap;
+    const dateType = userDateTypeMap;
     const filterData = getState().data.filterData;
     const radioValue = filterData.radioValue;
     const showTypes = filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value });
     const allTimeTypeData = [];
-    Object.keys(dataType).map(userNumberKey => {
-        const userTimeTypeDataArr = dataType[userNumberKey];
+    Object.keys(dateType).map(userNumberKey => {
+        const userTimeTypeDataArr = dateType[userNumberKey];
         userTimeTypeDataArr.map(
             timeTypeData => {
                 //没有过滤操作
@@ -810,12 +851,13 @@ const calculteSumCatgByReget = (getState, userDateTypeMap, sameDay, sameMd5) => 
 }
 
 //重新检索-时间类型构建  date_type:
-function regetDescDateTypeArr(getState, userDateTypeMap, sameDay, sameMd5) {
+function regetDescDateTypeArr(getState, analyseDays, userDateTypeMap, sameDay, sameMd5) {
     const timeDataArray = calculteTimeDataArrayByReget(getState, userDateTypeMap, sameDay, sameMd5);
     return {
         type: ActionTypes.DATA.DATA_DATETYPE_REGET,
         userDateTypeMap,
-        timeDataArray
+        timeDataArray,
+        analyseDays
     }
 }
 

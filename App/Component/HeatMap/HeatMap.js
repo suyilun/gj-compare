@@ -71,14 +71,13 @@ const GDayRects = ({ startMoment, endMoment, dataMap, classForDay, titleForDay, 
             countWeek = startMoment.day() + 1;
         }
         while (countWeek > 0 && startMoment.isAfter(endMoment)) {
-            const tokenDate = startMoment.format("YYYY-MM-DD");
+            const tokenDate = startMoment.format("YYYYMMDD");
             const dayData = dataMap[tokenDate];
             const tokenClass = classNames({
                 [COLOR_EMPTY]: typeof dayData == "undefined",
                 [_.has(dayData, "value") ? `color-filled-${dayData.value}` : '']: true,
                 [classForDay(dayData)]: true
             });
-
             let token = (
                 <rect
                     x={GUTTER_SPACE}
@@ -146,12 +145,13 @@ export default class HeatMap extends React.Component {
         clickForDay: (dayData) => {
             console.log("clickForDay", dayData)
         },
-        data: [
-            { time: '2017-10-22', value: 3 },
-            { time: '2017-10-25', value: 4 },
-            { time: '2017-10-28', value: 2 },
-            { time: '2017-11-01', value: 1 }
-        ],
+        data: {
+            '2017-10-22': 1,
+            '2017-10-25': 2,
+            '2017-10-28': 3,
+            '2017-11-01': 4
+        }
+        ,
         startDay: moment(new Date()).format("YYYYMMDD"),
         endDay: moment(new Date()).add(-365, "day").format("YYYYMMDD"),
     }
@@ -160,9 +160,12 @@ export default class HeatMap extends React.Component {
         const startMoment = moment(startDay);
         const endMoment = moment(endDay);
         const dataMap = {};
-        data.map(dataRow => {
-            dataMap[dataRow.time] = dataRow;
+        Object.keys(data).map(day => {
+            dataMap[day] = { value: data[day] }
         })
+        // data.map(dataRow => {
+        //     dataMap[dataRow.time] = dataRow;
+        // })
         // console.log("startM", startMoment.format("M"), startMoment.day(), startMoment.date());
         // console.log("endM", endMoment.format("M"), endMoment.day(), dataMap);
         // 如果没有title

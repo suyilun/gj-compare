@@ -379,13 +379,26 @@ class Content extends React.Component {
 
     moveTimeScroller = (value) => {
         let nowMonth = null;
-        for (var month in this.timePosition) {
+        let months = Object.keys(this.timePosition).sort(function (a, b) {
+            return b - a;
+        });
+        for (var i = 0; i < months.length; i++) {
+            var month = months[i];
             value = value - this.timePosition[month];
             if (value < 0) {
                 nowMonth = month;
                 break;
             }
         }
+
+
+        // for (var month in this.timePosition) {
+        //     value = value - this.timePosition[month];
+        //     if (value < 0) {
+        //         nowMonth = month;
+        //         break;
+        //     }
+        // }
         //this.refs.timeSelectRef.setState({ nowMonth });
         this.refs.monthLeftShowRef.setState({ nowMonth })
     }
@@ -438,7 +451,7 @@ class Content extends React.Component {
             height = height - BASELINE_HEIGHT;
         }
 
-        const timeDataArray = data.desc.date_type.timeDataArray;
+        const { timeDataArray, analyseDays } = data.desc.date_type;
         const sameDay = data.desc.sameDay;
         const sameMd5 = data.desc.sameMd5;
         const userChartDataMonth = chartDataByMonth(chartData);
@@ -538,7 +551,7 @@ class Content extends React.Component {
                                 <TraceTable loadData={loadData} />
                             </Col>
                             <Col span={12} style={{ boxShadow: '-6px 0 6px -4px rgba(0,0,0,.2)' }}>
-                                <HeatMap />
+                                <HeatMap  data={analyseDays}/>
                             </Col>
                         </Row>
                     </div>
