@@ -337,7 +337,7 @@ const calculteSameMd5 = (getState, userTimeTypeDataArr, calculteSameDay, userNum
         userTimeTypeDataArr = dateType[userNumber];
         userTimeTypeDataArr.map(timeTypeData => {
             if (typeof sameMd5[timeTypeData.md5] == "undefined") {
-                console.log("md5 键不存在" + timeTypeData.md5);
+                console.warn("md5 键不存在" + timeTypeData.md5);
             } else {
                 if (sameMd5[timeTypeData.md5].count == 1) {
                     delete sameMd5[timeTypeData.md5];
@@ -475,7 +475,7 @@ function iscontain(sfzh, mappings) {
 export function loadData(sfzh) {
     //thunk middleware 知道如何处理函数
     //这里把 dispatch 方法通过参数的形式传给函数以此来让它自己也能dispatch action
-    console.log("加载ajax....");
+    // console.log("加载ajax....");
     return function (dispatch, getState) {
         //console.log(getState());//获取state getState是function 而getstate() 的结果是state
         //let sfzh=getState().filter.timeAndNumber.userNumber;
@@ -489,7 +489,7 @@ export function loadData(sfzh) {
         //TODO:旧请求地址
         ///json/${sfzh}.json
         ///fwzy/do/track/data
-        console.log("getState()", getState())
+        // console.log("getState()", getState())
         return axios.get(`/json/${sfzh}.json`,
             {
                 params: {
@@ -554,7 +554,7 @@ export function loadData(sfzh) {
             //     });
             //停止显示进度条
             dispatch(isLoadWait(false));
-            console.log("更新后的state:", getState());
+            // console.log("更新后的state:", getState());
         })
             .catch(function (error) {
                 console.error(error);
@@ -628,7 +628,7 @@ export function dataCancel(userNumber) {
         //删除数据
         dispatch(deleteData(userNumber))
         // dispatch({ type: ActionTypes.CHART.CHART_DELETE_DATA, userNumber })
-        console.log("更新后的state:", getState());
+        // console.log("更新后的state:", getState());
     }
 }
 
@@ -650,8 +650,6 @@ function loadDetailData(data) {
 
 //加载详情
 export function loadDetail(hbaseKey) {
-    console.log("详情加载ajax....");
-    console.log(hbaseKey);
     return false;
     return function (dispatch, getState) {
         //console.log(getState());//获取state getState是function 而getstate() 的结果是state

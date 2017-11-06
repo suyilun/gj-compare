@@ -349,7 +349,7 @@ class Content extends React.Component {
         });
         this.monthPosition = tempPosition;
         this.dayPosition = tempDayPosition;
-        console.log("%o 转时间monthpositon: %o,dayPosition:%o", timeDataArray, this.monthPosition, this.dayPosition);
+        // console.log("%o 转时间monthpositon: %o,dayPosition:%o", timeDataArray, this.monthPosition, this.dayPosition);
     }
 
     moveTimeScroller = (value) => {
@@ -389,7 +389,7 @@ class Content extends React.Component {
             }
             scrollerWidth += this.monthPosition[month];
         }
-        console.log("changeTimeSelect:", nowMonth, scrollerWidth, this.monthPosition)
+        // console.log("changeTimeSelect:", nowMonth, scrollerWidth, this.monthPosition)
         this.refs.personTraceRef.scrollLeft = scrollerWidth;
         this.refs.timelineRef.scrollLeft = scrollerWidth;
     }
@@ -420,7 +420,7 @@ class Content extends React.Component {
             scrollerWidth += dayWidthInMonth[dayKey];
         }
         // scrollerWidth += this.dayPosition[dayClick];
-        console.log("changeTimeSelect:", nowMonth, scrollerWidth, dayWidthInMonth, );
+        // console.log("changeTimeSelect:", nowMonth, scrollerWidth, dayWidthInMonth, );
         this.refs.personTraceRef.scrollLeft = scrollerWidth;
         this.refs.timelineRef.scrollLeft = scrollerWidth;
     }
@@ -450,7 +450,7 @@ class Content extends React.Component {
 
     render() {
         let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart, changeSameRadioFunc } = this.props;
-        console.log("content改变：", this.props);
+        // console.log("content改变：", this.props);
         const { loadData, chartData } = data;
         let height = {};
         const userNumberSize = Object.keys(loadData).length;
@@ -477,7 +477,7 @@ class Content extends React.Component {
         const showTypes = data.filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value });
         const { radioValue, startTime, endTime } = data.filterData;
 
-        console.log("height is ", height, moment(startTime, "YYYY-MM-DD").format("YYYYMMDD"));
+        // console.log("height is ", height, moment(startTime, "YYYY-MM-DD").format("YYYYMMDD"));
         return (
             <Row>
                 <Col span="24">
