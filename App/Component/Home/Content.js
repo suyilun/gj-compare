@@ -20,6 +20,8 @@ import PeopleTraceList from '../PartOption/PeopleTraceList';
 import OneDayIndex from '../PartOption/oneDayIndexOption';
 import DetailOption from '../PartOption/detailOption';
 import HeatMap from '../HeatMap/HeatMap.js';
+import moment from 'moment';
+moment.locale('zh-cn');
 // import 'react-vis/dist/style.css';
 
 const BASELINE_HEIGHT = 35;
@@ -206,7 +208,7 @@ const TraceAnaylse = () => {
     )
 }
 
-const TraceTable = ({ loadData }) => {
+const TraceTable = ({ loadData, timeDataArray }) => {
     const userNumbers = Object.keys(loadData);
     if (userNumbers.length == 0) {
         return null;
@@ -254,17 +256,28 @@ const TraceTable = ({ loadData }) => {
             width: '10%',
             dataIndex: 'qt',
         },];
+
+        const allDays = timeDataArray.map(timeDataItem => {
+            return timeDataItem.day;
+        })
+
         const data = [];
+        //过滤掉日期
         userNumbers.map(userNumber => {
             const user = { key: userNumber, name: loadData[userNumber].people.name };
             loadData[userNumber].content.map((trace) => {
-                if (typeof user[trace.catg] == 'undefined') {
-                    user[trace.catg] = 0;
+                let traceDay = String(trace.traceTime).substr(0, 8);
+                if (allDays.indexOf(traceDay) != -1) {
+                    if (typeof user[trace.catg] == 'undefined') {
+                        user[trace.catg] = 0;
+                    }
+                    user[trace.catg] = user[trace.catg] + 1;
                 }
-                user[trace.catg] = user[trace.catg] + 1;
             })
             data.push(user);
         });
+
+
 
         return (
             <Table
@@ -304,94 +317,55 @@ class Content extends React.Component {
     constructor(props) {
         super(props);
         const { traceWidth } = this.props.ui;//窗口宽度
-        this.timePosition = {};
+        this.monthPosition = {};
+        this.dayPosition = {};
         // this.state = { nowMonth: null };
         // this.timePosition = {};//位置距离
         //console.log("this.timePosition %o", this.timePosition)
         //this.state = { scrollWidth: 0 };
     }
 
-    // componentDidUpdate(prevProps) {
-    //     //判断状态是否有变化
-    //     //filterData属性变化，radioValue变化，用户变化
-    //     let needUpdate = false;
-    //     const prevRadio = prevProps.data.filterData.radioValue;
-    //     const radio = this.props.data.filterData.radioValue;
-    //     needUpdate = prevRadio != radio
-    //     if (!needUpdate) {
-    //         const prevOptions = prevProps.data.filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value })
-    //             .join(",");
-    //         const options = this.props.data.filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value })
-    //             .join(",");
-    //         needUpdate = prevOptions != options;
-    //     }
-    //     if (!needUpdate) {
-    //         const prevUsers = Object.keys(prevProps.data.loadData);
-    //         const users = Object.keys(this.props.data.loadData);
-    //         for (var i = 0; i < prevUsers.length; i++) {
-    //             if (users.indexOf(prevUsers[i]) == -1) {
-    //                 needUpdate = true;
-    //                 break;
-    //             }
-    //         }
-    //         if (!needUpdate) {
-    //             for (var i = 0; i < users.length; i++) {
-    //                 if (prevUsers.indexOf(users[i]) == -1) {
-    //                     needUpdate = true;
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //         if (needUpdate) {
-    //             const timeDataArray = this.props.data.desc.date_type.timeDataArray;
-    //             timeDataArray.map((timeData) => {
-    //                 if (typeof timePosition[timeData.month] == 'undefined') {
-    //                     this.timePosition[timeData.month] = 40;
-    //                 } else {
-    //                     timeData.dayData.map((timeInDay) => {
-    //                         this.timePosition[timeData.month] = this.timePosition[timeData.month] + 210;
-    //                     });
-    //                 }
-    //             })
-    //             console.log("修改日期位置.....%o", this.timePosition);
-    //         }
-    //     }
-    //}
-
     componentWillUpdate(nextProps, nextState) {
         let tempPosition = {};
+        const tempDayPosition = {};
         const timeDataArray = nextProps.data.desc.date_type.timeDataArray;
         let newDay = null;
         timeDataArray.map((timeData) => {
             if (typeof tempPosition[timeData.month] == 'undefined') {
                 tempPosition[timeData.month] = 0;
             }
+            if (typeof tempDayPosition[timeData.month] == 'undefined') {
+                tempDayPosition[timeData.month] = {};
+            }
+
             if (newDay != timeData.day) {
                 tempPosition[timeData.month] = tempPosition[timeData.month] + 40;
+                tempDayPosition[timeData.month][timeData.day] = 40;
             }
             timeData.dayData.map((timeInDay) => {
                 tempPosition[timeData.month] = tempPosition[timeData.month] + 210;
+                tempDayPosition[timeData.month][timeData.day] += 210;
             });
+
         });
-        this.timePosition = tempPosition;
-        console.log("%o 转时间位置 %o", timeDataArray, this.timePosition);
+        this.monthPosition = tempPosition;
+        this.dayPosition = tempDayPosition;
+        console.log("%o 转时间monthpositon: %o,dayPosition:%o", timeDataArray, this.monthPosition, this.dayPosition);
     }
 
     moveTimeScroller = (value) => {
         let nowMonth = null;
-        let months = Object.keys(this.timePosition).sort(function (a, b) {
+        let months = Object.keys(this.monthPosition).sort(function (a, b) {
             return b - a;
         });
         for (var i = 0; i < months.length; i++) {
             var month = months[i];
-            value = value - this.timePosition[month];
+            value = value - this.monthPosition[month];
             if (value < 0) {
                 nowMonth = month;
                 break;
             }
         }
-
-
         // for (var month in this.timePosition) {
         //     value = value - this.timePosition[month];
         //     if (value < 0) {
@@ -404,21 +378,59 @@ class Content extends React.Component {
     }
 
     changeTimeSelect = (nowMonth) => {
-        this.refs.timeSelectRef.setState({ nowMonth })
+        // this.refs.timeSelectRef.setState({ nowMonth })
         let scrollerWidth = 0;
-        for (var month in this.timePosition) {
+        let months = Object.keys(this.monthPosition).sort(function (a, b) {
+            return b - a;
+        });
+        for (var i = 0; i < months.length; i++) {
+            var month = months[i];
             if (month == nowMonth) {
                 break;
             }
-            scrollerWidth += this.timePosition[month];
+            scrollerWidth += this.monthPosition[month];
         }
-        console.log("changeTimeSelect:", nowMonth, scrollerWidth, this.timePosition)
+        console.log("changeTimeSelect:", nowMonth, scrollerWidth, this.monthPosition)
         this.refs.personTraceRef.scrollLeft = scrollerWidth;
         this.refs.timelineRef.scrollLeft = scrollerWidth;
     }
 
-    clickHeatMap = (heatDay) => {
+    moveToDay = (clickDay) => {
+        let nowMonth = clickDay.substr(0, 6);
+        let scrollerWidth = 0;
+        let months = Object.keys(this.monthPosition).sort(function (a, b) {
+            return b - a;
+        });
+        for (var i = 0; i < months.length; i++) {
+            var month = months[i];
+            if (month == nowMonth) {
+                break;
+            }
+            scrollerWidth += this.monthPosition[month];
+        }
 
+        const dayWidthInMonth = this.dayPosition[nowMonth];
+        const dayKeys = Object.keys(dayWidthInMonth).sort(function (a, b) {
+            return b - a;
+        });
+        for (var i = 0; i < dayKeys.length; i++) {
+            var dayKey = dayKeys[i];
+            if (dayKey == clickDay) {
+                break;
+            }
+            scrollerWidth += dayWidthInMonth[dayKey];
+        }
+        // scrollerWidth += this.dayPosition[dayClick];
+        console.log("changeTimeSelect:", nowMonth, scrollerWidth, dayWidthInMonth, );
+        this.refs.personTraceRef.scrollLeft = scrollerWidth;
+        this.refs.timelineRef.scrollLeft = scrollerWidth;
+    }
+
+
+    clickDayHeatMap = (tokenDate, dayData) => {
+        //时间选择操作
+        this.moveToDay(tokenDate);
+        //console.log("tokenDate", tokenMonth)
     }
 
     componentDidMount() {
@@ -434,6 +446,8 @@ class Content extends React.Component {
             this.refs.timelineRef.scrollLeft = value;
         });
     }
+
+
 
     render() {
         let { ui, data, showTimeIndex, addUser, showDetailFunc, changeShowChart, changeSameRadioFunc } = this.props;
@@ -461,7 +475,10 @@ class Content extends React.Component {
                 timeChoose = timeDataArray[0].month;
             }
         }
-        console.log("height is ", height);
+
+        const { radioValue, startTime, endTime } = data.filterData;
+
+        console.log("height is ", height, moment(startTime, "YYYY-MM-DD").format("YYYYMMDD"));
         return (
             <Row>
                 <Col span="24">
@@ -502,7 +519,7 @@ class Content extends React.Component {
                         <Button type="primary" icon="search" size="small" onClick={
                             () => { if (!ui.isLoad.isLoadStatus) { addUser(this.refs.userNumberInput.refs.input.value) } }
                         }>添加</Button>
-                        <Radio.Group value={data.filterData.radioValue} onChange={changeSameRadioFunc} style={{ marginLeft: 15 }}>
+                        <Radio.Group value={radioValue} onChange={changeSameRadioFunc} style={{ marginLeft: 15 }}>
                             <Radio value={"all"}><b className="all">所有</b></Radio>
                             <Radio value={"sameDay"}><b className="sameDay">同日</b></Radio>
                             <Radio value={"sameTwo"}><b className="sameTwo">两两相同</b></Radio>
@@ -548,10 +565,16 @@ class Content extends React.Component {
                         className="b-right" style={{ overflowX: "hidden", height: BOTTOM_HEIGHT }} >
                         <Row gutter={4} >
                             <Col span={12} style={{ height: BOTTOM_HEIGHT }}>
-                                <TraceTable loadData={loadData} />
+                                <TraceTable loadData={loadData} timeDataArray={timeDataArray} />
                             </Col>
                             <Col span={12} style={{ boxShadow: '-6px 0 6px -4px rgba(0,0,0,.2)' }}>
-                                <HeatMap  data={analyseDays}/>
+                                <HeatMap
+                                    data={analyseDays}
+                                    startDay={moment(endTime, "YYYY-MM-DD").format("YYYYMMDD")}
+                                    endDay={moment(startTime, "YYYY-MM-DD").format("YYYYMMDD")}
+                                    //titleForDay={() => { }}
+                                    clickForDay={this.clickDayHeatMap}
+                                />
                             </Col>
                         </Row>
                     </div>

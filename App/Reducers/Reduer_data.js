@@ -30,7 +30,6 @@ const initFilter = () => {
         radioValue: 'all',
         timeChoose: null,
     };
-
 }
 
 

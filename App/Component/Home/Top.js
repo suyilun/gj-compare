@@ -10,7 +10,7 @@ const Option = ({ ischeck, optionClass, optionName, checkOption, sumRows }) => (
     <li className={ischeck ? optionClass + ' life-check' : optionClass} onClick={checkOption}>
         <p href="javascript:;">
             <i></i>
-            <span>{optionName}{sumRows!=0?`(${sumRows})`:''}</span>
+            <span>{optionName}{sumRows != 0 ? `(${sumRows})` : ''}</span>
         </p>
     </li>
 )
@@ -21,7 +21,7 @@ class Head extends React.Component {
         let { topShow, filterData, sumCatg, setStartTime, setEndTime, checkOption, reGetTraces } = this.props;
         const { options, startTime, endTime, } = filterData;
         return (
-            <Row  className="top" style={{ display: topShow ? 'block' : 'none' }}>
+            <Row className="top" style={{ display: topShow ? 'block' : 'none' }}>
                 <Col span="16">
                     <a href="javascript:;" className="logo">
                     </a>
@@ -43,9 +43,16 @@ class Head extends React.Component {
                 </Col>
                 <Col span="8">
                     <div className={"searchAgain"}>
-                        <DatePicker defaultValue={moment(startTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setStartTime(dateString) }} />
+                        <DatePicker
+                            defaultValue={moment(startTime, 'YYYY-MM-DD')}
+                            onChange={(date, dateString) => { setStartTime(dateString) }}
+                            allowClear={false}
+                        />
                         -
-                         <DatePicker defaultValue={moment(endTime, 'YYYY-MM-DD')} onChange={(date, dateString) => { setEndTime(dateString) }} />
+                         <DatePicker
+                            defaultValue={moment(endTime, 'YYYY-MM-DD')}
+                            onChange={(date, dateString) => { setEndTime(dateString) }}
+                            allowClear={false} />
                         <Button icon="user" type="primary" onClick={reGetTraces}>重新比对</Button>
                     </div>
                 </Col>

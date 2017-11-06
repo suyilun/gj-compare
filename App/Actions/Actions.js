@@ -162,8 +162,11 @@ const filterByRadio = (radioValue, dayValue, md5Value, sameDay, sameMd5, userNum
 }
 
 
-const calculteAnalyseDays = (sameDay, sameMd5, userSize) => {
+const calculteAnalyseDays = (sameDay, sameMd5, userSize, timeDataArray) => {
     const analyseDays = {}
+    const allShowDay = {};
+
+
     Object.keys(sameDay).map(dayInSameDay => {
         if (sameDay[dayInSameDay] == 1) {
             //有轨迹为1
@@ -172,13 +175,15 @@ const calculteAnalyseDays = (sameDay, sameMd5, userSize) => {
             //相同为2
             analyseDays[dayInSameDay] = 2;
         }
-
     })
     if (userSize != 1) {
         Object.keys(sameMd5).filter(md5 => {
             //md5
             const item = sameMd5[md5];
-            if (item.count > 1 && item.count < userSize) {
+            if (item.count == 1) {
+
+            }
+            else if (item.count > 1 && item.count < userSize) {
                 //两两相同为3
                 analyseDays[item.day] = 3;
             }
@@ -190,6 +195,18 @@ const calculteAnalyseDays = (sameDay, sameMd5, userSize) => {
             }
         });
     }
+    if (timeDataArray) {
+        timeDataArray.map(timeDataItem => {
+            allShowDay[timeDataItem.day] = 1;
+        });
+        const dayKeys = Object.keys(analyseDays);
+        dayKeys.map(dayKey => {
+            if (!allShowDay[dayKey]) {
+                delete analyseDays[dayKey];
+            }
+        });
+    }
+    //判断日期是否在timeDataArray中
     return analyseDays;
 }
 
@@ -201,16 +218,13 @@ const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDat
     //加入 radioValue属性
     const showTypes = filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value });
     //重新计算sameDay
-    const sameDay = calculteSameDay(getState, userTimeTypeDataArr, isDeleteUser);
+    const sameDay = calculteSameDay(getState, userTimeTypeDataArr, userNumber, isDeleteUser);
     //计算相同md5日
-    const sameMd5 = calculteSameMd5(getState, userTimeTypeDataArr, isDeleteUser);
+    const sameMd5 = calculteSameMd5(getState, userTimeTypeDataArr, userNumber, isDeleteUser);
     const userNumbersInState = Object.keys(dateType).filter(item => { return !(item == 'timeDataArray' || item == 'analyseDays') });
     //对比的人数
     let userSize = isDeleteUser ? userNumbersInState.length - 1 : userNumbersInState.length + 1;
     //分析所有的日期情况
-
-    const analyseDays = calculteAnalyseDays(sameDay, sameMd5, userSize);
-
     const allTimeTypeData = [];
     userNumbersInState.map(userNumberKey => {
         if (userNumber != userNumberKey) {
@@ -245,46 +259,51 @@ const calculteTimeDataArrayByUserChange = (getState, userNumber, userTimeTypeDat
     }).map((itemTypeData) => {
         return itemTypeData.time;
     });
-    const timeDataArray = timeArrayToTimeDataArray(allTimes)
+    const timeDataArray = timeArrayToTimeDataArray(allTimes);
+    const analyseDays = calculteAnalyseDays(sameDay, sameMd5, userSize, timeDataArray);
     return { timeDataArray, analyseDays };
 }
 
-
-
-
 //计算同一天
-const calculteSameDay = (getState, userTimeTypeDataArr, isDeleteUser = false) => {
+const calculteSameDay = (getState, userTimeTypeDataArr, userNumber, isDeleteUser = false) => {
     const sameDay = _.cloneDeep(getState().data.desc.sameDay);
     const allDays = Object.keys(sameDay);
-    let dayMap = {};
+    const hasDoDay = {};//已经操作过日期
     if (!isDeleteUser) {
         //新增用户
+
         userTimeTypeDataArr.map(timeTypeData => {
             //按照天统计
-            if (!dayMap[timeTypeData.day]) {
-                if (allDays.indexOf(timeTypeData.day) != -1) {
+            const day = timeTypeData.day;
+            if (!hasDoDay[day]) {
+                if (allDays.indexOf(day) != -1) {
                     //有数据
-                    sameDay[timeTypeData.day] = sameDay[timeTypeData.day] + 1;
+                    sameDay[day] = sameDay[day] + 1;
                 } else {
                     //无数据
-                    sameDay[timeTypeData.day] = 1
+                    sameDay[day] = 1
                 }
+                hasDoDay[day] = 1;
             }
         });
     } else {
         //删除用户时
+        const dateType = getState().data.desc.date_type;
+        userTimeTypeDataArr = dateType[userNumber];
         userTimeTypeDataArr.map(timeTypeData => {
-            if (!dayMap[timeTypeData.day]) {
-                if (allDays.indexOf(timeTypeData.day) != -1) {
-                    if (sameDay[timeTypeData.day] == 1) {
-                        delete sameDay[timeTypeData.day];
+            const day = timeTypeData.day;
+            if (!hasDoDay[day]) {
+                if (allDays.indexOf(day) != -1) {
+                    if (sameDay[day] == 1) {
+                        delete sameDay[day];
                     } else {
-                        if (sameDay[timeTypeData.day]) {
-                            sameDay[timeTypeData.day] = sameDay[timeTypeData.day] - 1;
+                        if (sameDay[day]) {
+                            sameDay[day] = sameDay[day] - 1;
                         }
                     }
+                    hasDoDay[day] = 1;
                 } else {
-                    console.error("state.desc.sameDay中不存在日期为：" + timeTypeData.day + "数据");
+                    console.error("state.desc.sameDay中不存在日期为：" + day + "数据");
                 }
             }
         })
@@ -296,7 +315,7 @@ const calculteSameDay = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
 }
 
 //计算统一个md5
-const calculteSameMd5 = (getState, userTimeTypeDataArr, isDeleteUser = false) => {
+const calculteSameMd5 = (getState, userTimeTypeDataArr, calculteSameDay, userNumber, isDeleteUser = false) => {
     const sameMd5 = _.cloneDeep(getState().data.desc.sameMd5);
     //md5;
     if (!isDeleteUser) {
@@ -309,6 +328,8 @@ const calculteSameMd5 = (getState, userTimeTypeDataArr, isDeleteUser = false) =>
             }
         })
     } else {
+        const dateType = getState().data.desc.date_type;
+        userTimeTypeDataArr = dateType[userNumber];
         userTimeTypeDataArr.map(timeTypeData => {
             if (typeof sameMd5[timeTypeData.md5] == "undefined") {
                 console.log("md5 键不存在" + timeTypeData.md5);
@@ -650,13 +671,18 @@ export function changeSameRadio(radioValue) {
     return (dispatch, getState) => {
         dispatch(isLoadWait(true));
         const timeDataArray = calculteTimeDataArrayByChangeOptionAndRadio(getState, undefined, undefined, radioValue);
+        const sameMd5 = getState().data.desc.sameMd5;
+        const sameDay = getState().data.desc.sameDay;
         const sumCatg = calculteCatgSumRadioChange(getState, radioValue);
-
+        const loadData = getState().data.loadData;
+        const userNumberSize = Object.keys(loadData).length;
+        const analyseDays = calculteAnalyseDays(sameDay, sameMd5, userNumberSize, timeDataArray);
         dispatch(isLoadWait(false));
         return dispatch({
             type: ActionTypes.FILTER.RADIO_CHANGE,
             radioValue,
             timeDataArray,
+            analyseDays,
             sumCatg,
         })
     }
@@ -734,8 +760,6 @@ export function reGetTraces() {
             const sameDay = calculteSameDayByReget(userDateTypeMap);
             const sameMd5 = calculteSameMd5ByReget(userDateTypeMap);
 
-            const analyseDays = calculteAnalyseDays(sameDay, sameMd5, personDataList.length);
-
             dispatch(regetDescSameDay(sameDay));
             dispatch(regetDescSameMd5(sameMd5));
             //分析数据 mapping数据
@@ -744,7 +768,7 @@ export function reGetTraces() {
             dispatch(regetContent(personDataList));
             //合计
             dispatch(regetDescSumCatg(getState, userDateTypeMap, sameDay, sameMd5));
-            dispatch(regetDescDateTypeArr(getState, analyseDays, userDateTypeMap, sameDay, sameMd5));
+            dispatch(regetDescDateTypeArr(getState, userDateTypeMap, sameDay, sameMd5));
             //数据存储
             dispatch(isLoadWait(false));
         }).catch(function (error) {
@@ -788,18 +812,19 @@ const calculteTimeDataArrayByReget = (getState, userDateTypeMap, sameDay, sameMd
 //计算同一天
 const calculteSameDayByReget = (userDateTypeMap) => {
     const sameDay = {};
-    const allDays = Object.keys(sameDay);
     Object.keys(userDateTypeMap).map(userNumber => {
         const userTimeTypeDataArr = userDateTypeMap[userNumber];
-        let userHasDayMap = {};
+        const userHasDayMap = {};
+        const hasAddDay = {};
         userTimeTypeDataArr.map(userTimeTypeData => {
-            if (typeof sameDay[userTimeTypeData.day] == 'undefined') {
-                sameDay[userTimeTypeData.day] = 1;
-                userHasDayMap[userTimeTypeData.day] = 1;
-            } else {
-                if (!userHasDayMap[userTimeTypeData.day]) {
-                    sameDay[userTimeTypeData.day] = sameDay[userTimeTypeData.day] + 1;
+            const day = userTimeTypeData.day;
+            if (!hasAddDay[day]) {
+                if (typeof sameDay[day] == 'undefined') {
+                    sameDay[day] = 1;
+                } else {
+                    sameDay[day] = sameDay[day] + 1;
                 }
+                hasAddDay[day] = 1;
             }
         })
     });
@@ -851,8 +876,10 @@ const calculteSumCatgByReget = (getState, userDateTypeMap, sameDay, sameMd5) => 
 }
 
 //重新检索-时间类型构建  date_type:
-function regetDescDateTypeArr(getState, analyseDays, userDateTypeMap, sameDay, sameMd5) {
+function regetDescDateTypeArr(getState, userDateTypeMap, sameDay, sameMd5) {
     const timeDataArray = calculteTimeDataArrayByReget(getState, userDateTypeMap, sameDay, sameMd5);
+    const userNumberSize = Object.keys(userDateTypeMap).length;
+    const analyseDays = calculteAnalyseDays(sameDay, sameMd5, userNumberSize, timeDataArray);
     return {
         type: ActionTypes.DATA.DATA_DATETYPE_REGET,
         userDateTypeMap,

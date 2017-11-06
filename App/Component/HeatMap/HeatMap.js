@@ -2,19 +2,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames/bind';
 import moment from 'moment';
+moment.locale('zh-cn');
 import _ from 'lodash';
 import { Tooltip } from 'antd';
-moment.locale('zh-cn');
 require("./HeatMap.less");
 const MILLISECONDS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 const DAYS_IN_WEEK = 7;
-const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-//const MONTH_LABELS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+//const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_LABELS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
 // const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 const DAY_LABELS = ['', '周一', '', '周三', '', '周五', ''];
 const WEEK_X = 20;
 const WEEK_Y = 40;
-const MONTH_X = 40;
+const MONTH_X = 50;
 const MONTH_Y = 10;
 const DAYS_X = 60;
 const DAYS_Y = 30;//距离顶部距离
@@ -41,7 +41,8 @@ const GMonthLabel = ({ monthLabels, startMoment, endMoment }) => {
     let dayInWeek = startMoment.day();
     let dateInMonth = startMoment.date();
     let weekNums = 0;
-    while (startMoment.isAfter(endMoment)) {
+    endMoment = endMoment.add(-1, "day");
+    while (!startMoment.isSame(endMoment)) {
         if (dayInWeek == 7) {
             weekNums++;
             dayInWeek = 0;
@@ -64,6 +65,7 @@ const GMonthLabel = ({ monthLabels, startMoment, endMoment }) => {
 const GDayRects = ({ startMoment, endMoment, dataMap, classForDay, titleForDay, clickForDay }) => {
     const weekDays = [];
     let weekNum = 0;
+    endMoment = endMoment.add(-1, "day");
     while (startMoment.isAfter(endMoment)) {
         let daysInWeek = [];
         let countWeek = 7;
@@ -85,14 +87,16 @@ const GDayRects = ({ startMoment, endMoment, dataMap, classForDay, titleForDay, 
                     width={DAY_WIDTH}
                     height={DAY_WIDTH}
                     className={tokenClass}>
-                    {dataMap[tokenDate] ? null : (<title>{titleForDay(tokenDate, dayData)}</title>)}
+                    {dayData ? null : (<title>{titleForDay(tokenDate, dayData)}</title>)}
                 </rect>
             );
-            if (dataMap[tokenDate]) {
+            if (dayData) {
+                console.log("dayData 有数据。。。")
+                const title = titleForDay(tokenDate, dayData);
                 token = (
                     <Tooltip
-                        title={titleForDay(tokenDate, dayData)}
-                        onClick={() => { clickForDay ? clickForDay(dayData) : () => { } }}
+                        title={title}
+                        onClick={() => { clickForDay ? clickForDay(tokenDate, dayData) : () => { } }}
                     >
                         {token}
                     </Tooltip>
@@ -136,13 +140,9 @@ export default class HeatMap extends React.Component {
             return '';
         },
         titleForDay: (tokenDate, dayData) => {
-            if (dayData) {
-                return dayData.time;
-            } else {
-                return tokenDate;
-            }
+            return `${tokenDate}`;
         },
-        clickForDay: (dayData) => {
+        clickForDay: (tokenDate, dayData) => {
             console.log("clickForDay", dayData)
         },
         data: {
