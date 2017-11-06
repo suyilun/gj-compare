@@ -91,7 +91,6 @@ const GDayRects = ({ startMoment, endMoment, dataMap, classForDay, titleForDay, 
                 </rect>
             );
             if (dayData) {
-                console.log("dayData 有数据。。。")
                 const title = titleForDay(tokenDate, dayData);
                 token = (
                     <Tooltip
@@ -116,6 +115,31 @@ const GDayRects = ({ startMoment, endMoment, dataMap, classForDay, titleForDay, 
     return (
         <g transform={`translate(${DAYS_X}, ${DAYS_Y})`}>
             {weekDays}
+        </g>
+    );
+}
+
+const GDescription = ({ }) => {
+    return (
+        <g transform={`translate(100, 120)`}>
+            <g transform={`translate(0, 0)`}>
+                <rect width={10} height={10} className={"color-filled-1"} />
+                <text transform={"translate(10,10)"}>有轨迹</text>
+            </g>
+            <g transform={`translate(80, 0)`}>
+                <rect width={10} height={10} className={"color-filled-2"} />
+                <text transform={"translate(10,10)"}>同日轨迹</text>
+            </g>
+
+            <g transform={`translate(160, 0)`}>
+                <rect width={10} height={10} className={"color-filled-3"} />
+                <text transform={"translate(10,10)"}>两两相同</text>
+            </g>
+
+            <g transform={`translate(240, 0)`}>
+                <rect width={10} height={10} className={"color-filled-4"} />
+                <text transform={"translate(10,10)"}>完全相同</text>
+            </g>
         </g>
     );
 }
@@ -193,6 +217,9 @@ export default class HeatMap extends React.Component {
                     startMoment={_.cloneDeep(startMoment)}
                     endMoment={_.cloneDeep(endMoment)}
                 />
+
+                <GDescription />
+
             </svg>
         );
     }
