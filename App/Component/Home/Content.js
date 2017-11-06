@@ -208,7 +208,7 @@ const TraceAnaylse = () => {
     )
 }
 
-const TraceTable = ({ loadData, timeDataArray }) => {
+const TraceTable = ({ loadData, timeDataArray, showTypes }) => {
     const userNumbers = Object.keys(loadData);
     if (userNumbers.length == 0) {
         return null;
@@ -260,14 +260,13 @@ const TraceTable = ({ loadData, timeDataArray }) => {
         const allDays = timeDataArray.map(timeDataItem => {
             return timeDataItem.day;
         })
-
         const data = [];
         //过滤掉日期
         userNumbers.map(userNumber => {
             const user = { key: userNumber, name: loadData[userNumber].people.name };
             loadData[userNumber].content.map((trace) => {
                 let traceDay = String(trace.traceTime).substr(0, 8);
-                if (allDays.indexOf(traceDay) != -1) {
+                if (allDays.indexOf(traceDay) != -1 && showTypes.indexOf(trace.catg) != -1) {
                     if (typeof user[trace.catg] == 'undefined') {
                         user[trace.catg] = 0;
                     }
@@ -475,7 +474,7 @@ class Content extends React.Component {
                 timeChoose = timeDataArray[0].month;
             }
         }
-
+        const showTypes = data.filterData.options.filter((option) => { return option.ischeck }).map((option) => { return option.value });
         const { radioValue, startTime, endTime } = data.filterData;
 
         console.log("height is ", height, moment(startTime, "YYYY-MM-DD").format("YYYYMMDD"));
@@ -565,7 +564,11 @@ class Content extends React.Component {
                         className="b-right" style={{ overflowX: "hidden", height: BOTTOM_HEIGHT }} >
                         <Row gutter={4} >
                             <Col span={12} style={{ height: BOTTOM_HEIGHT }}>
-                                <TraceTable loadData={loadData} timeDataArray={timeDataArray} />
+                                <TraceTable
+                                    loadData={loadData}
+                                    timeDataArray={timeDataArray}
+                                    showTypes={showTypes}
+                                />
                             </Col>
                             <Col span={12} style={{ boxShadow: '-6px 0 6px -4px rgba(0,0,0,.2)' }}>
                                 <HeatMap

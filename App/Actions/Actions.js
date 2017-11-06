@@ -26,11 +26,16 @@ export function checkOption(optValue, optCheck) {
     return (dispatch, getState) => {
         const radioValue = getState().data.filterData.radioValue;
         const timeDataArray = calculteTimeDataArrayByChangeOptionAndRadio(getState, optValue, optCheck, radioValue);
+        const sameMd5 = getState().data.desc.sameMd5;//{md5{timer:1}}对象
+        const sameDay = getState().data.desc.sameDay;//{day:{timer:1}}对象
+        const userNumberSize = Object.keys(getState().data.loadData).length;
+        const analyseDays = calculteAnalyseDays(sameDay, sameMd5, userNumberSize, timeDataArray);
         dispatch({
             type: ActionTypes.OPTION.CHANGE_CHECK,
             optValue,
             optCheck,
-            timeDataArray
+            timeDataArray,
+            analyseDays
         });
     }
 }
