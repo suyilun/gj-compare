@@ -1,6 +1,9 @@
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import { Tooltip } from 'antd';
 import React from 'react';
 import classNames from 'classnames/bind';
+import moment from 'moment';
+moment.locale('zh-cn');
 import * as Actions from '../../Actions/Actions';
 
 // 6,2
@@ -28,7 +31,13 @@ const OneDayIndexShow = ({ day, dayData, sameDay, sameMd5 }) => {
     return (
         <ul className="life-time max-content">
             <li className="life-today" id={`time-day-${day}`}>
-                <span className="today-time life-radius"><b>{day.substr(6, 2)}</b></span>
+                <hr />
+                <span className="today-time life-radius">
+                    <Tooltip
+                        title={moment(day.substr(0,8),"YYYYMMDD").format("YYYY年MM月DD日")}
+                    ><b>{day.substr(6, 2)}</b>
+                    </Tooltip>
+                </span>
             </li>
             {tokens}
         </ul>

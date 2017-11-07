@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames/bind';
-import moment from 'moment';
-moment.locale('zh-cn');
 import _ from 'lodash';
 import { Tooltip } from 'antd';
+import moment from 'moment';
 require("./HeatMap.less");
 const MILLISECONDS_IN_ONE_DAY = 24 * 60 * 60 * 1000;
 const DAYS_IN_WEEK = 7;
@@ -36,11 +35,15 @@ const GWeekLabel = ({ weekLabels, startMoment, endMoment }) => {
     );
 }
 
-const GMonthLabel = ({ monthLabels, startMoment, endMoment }) => {
+const GMonthLabel = ({ monthLabels, startDay, endDay }) => {
     const months = [];
+    let startMoment=  moment(startDay,"YYYYMMDD");
+    let endMoment= moment(endDay,"YYYYMMDD");
     let dayInWeek = startMoment.day();
     let dateInMonth = startMoment.date();
     let weekNums = 0;
+   
+
     endMoment = endMoment.add(-1, "day");
     while (!startMoment.isSame(endMoment)) {
         if (dayInWeek == 7) {
@@ -62,7 +65,11 @@ const GMonthLabel = ({ monthLabels, startMoment, endMoment }) => {
         </g>);
 }
 
-const GDayRects = ({ startMoment, endMoment, dataMap, classForDay, titleForDay, clickForDay }) => {
+const GDayRects = ({ startDay, endDay, dataMap, classForDay, titleForDay, clickForDay }) => {
+
+    let startMoment=  moment(startDay,"YYYYMMDD");
+    let endMoment= moment(endDay,"YYYYMMDD");
+  
     const weekDays = [];
     let weekNum = 0;
     endMoment = endMoment.add(-1, "day");
@@ -73,6 +80,7 @@ const GDayRects = ({ startMoment, endMoment, dataMap, classForDay, titleForDay, 
             countWeek = startMoment.day() + 1;
         }
         while (countWeek > 0 && startMoment.isAfter(endMoment)) {
+            console.log("GDayRects")
             const tokenDate = startMoment.format("YYYYMMDD");
             const dayData = dataMap[tokenDate];
             const tokenClass = classNames({
@@ -176,13 +184,11 @@ export default class HeatMap extends React.Component {
             '2017-11-01': 4
         }
         ,
-        startDay: moment(new Date()).format("YYYYMMDD"),
-        endDay: moment(new Date()).add(-365, "day").format("YYYYMMDD"),
+        startDay:'20170101',//moment(new Date()).format("YYYYMMDD"),
+        endDay: '20171111',//moment(new Date()).add(-365, "day").format("YYYYMMDD"),
     }
     render() {
         const { title, monthLabels, weekLabels, startDay, endDay, data, classForDay, titleForDay, clickForDay } = this.props;
-        const startMoment = moment(startDay);
-        const endMoment = moment(endDay);
         const dataMap = {};
         Object.keys(data).map(day => {
             dataMap[day] = { value: data[day] }
@@ -203,8 +209,8 @@ export default class HeatMap extends React.Component {
             >
                 <GMonthLabel
                     monthLabels={monthLabels}
-                    startMoment={_.cloneDeep(startMoment)}
-                    endMoment={_.cloneDeep(endMoment)}
+                    startDay={startDay}
+                    endDay={endDay}
                 />
                 <GWeekLabel
                     weekLabels={weekLabels}
@@ -214,8 +220,8 @@ export default class HeatMap extends React.Component {
                     classForDay={classForDay}
                     titleForDay={titleForDay}
                     clickForDay={clickForDay}
-                    startMoment={_.cloneDeep(startMoment)}
-                    endMoment={_.cloneDeep(endMoment)}
+                    startDay={startDay}
+                    endDay={endDay}
                 />
 
                 <GDescription />

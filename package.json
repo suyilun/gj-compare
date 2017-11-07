@@ -5,10 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "nodemon --watch webpack.config.js --exec \"webpack-dev-server --color  --progress   --env development\"",
-    "webpack-dev-osx": " webpack-dev-server --color  --progress",
-    "webpack-dev-win": " webpack-dev-server    -d   --color --profile  --content-base build/ --port 9999",
-    "webpack-build-osx": "webpack  --progress --colors ",
-    "webpack-build-win": "webpack"
+    "webpack-dev": " webpack-dev-server --color  --progress",
+    "webpack-build": "webpack --config webpack.prod.js"
   },
   "keywords": [
     "React",

@@ -15,7 +15,7 @@ const barCard = (trace, traceStyle) => {
 const hotelCard = (trace, traceStyle) => {
     return (
         <div key={trace.hbaseKey} className={traceStyle}>
-            <h1 title={trace.hotelName}>{trace.hotelName}</h1>
+            <h1 title={trace.address}>{trace.hotelName}</h1>
             <ul>
                 <li><span>房号:</span><span>{trace.roomNo}</span></li>
                 <li><span>{trace.inTime}</span></li>
@@ -33,7 +33,7 @@ const trainCard = (trace, traceStyle) => {
             <ul>
                 <li><span>姓名:</span><span>{trace.name}</span></li>
                 <li><span>车次:</span><span>{trace.trainDate}</span></li>
-                <li style={{fontWeight:'border'}}><span >{trace.departure}</span><span> - </span><span>{trace.terminal}</span></li>
+                <li style={{ fontWeight: 'border' }}><span >{trace.departure}</span><span> - </span><span>{trace.terminal}</span></li>
             </ul>
             <img src={require(`../../images/life_class/${trace.catg}_life_big.png`)}></img>
         </div>
@@ -71,11 +71,11 @@ const trainCard = (trace, traceStyle) => {
 const busCard = (trace, traceStyle) => {
     return (
         <div key={trace.hbaseKey} className={traceStyle}>
-            <h1>{trace.startstationname}</h1>
+            <h1>{trace.terminal}</h1>
             <ul>
-                <li><span>姓名:</span><span>{trace.realname}</span></li>
-                <li><span>买票:</span><span>{trace.selltime_zhwz}</span></li>
-                <li><span>{trace.routename}</span></li>
+                <li><span>姓名:</span><span>{trace.name}</span></li>
+                <li><span>买票:</span><span>{trace.sellTime}</span></li>
+                <li><span>{trace.lineName}</span></li>
             </ul>
             <img src={require(`../../images/life_class/${trace.catg}_life_big.png`)}></img>
         </div>
@@ -86,7 +86,7 @@ const flightCard = (trace, traceStyle) => {
     const liArr = [];
     liArr.push(<li>{trace.seatNo ? (<span>座位:{trace.seatNo}</span>) : null}</li>);
     if (trace.takeOffStation || trace.terminalStation) {
-        liArr.push(<li><span style={{fontWeight:'border'}}>{trace.takeOffStation}-{trace.terminalStation}</span></li>);
+        liArr.push(<li><span style={{ fontWeight: 'border' }}>{trace.takeOffStation}-{trace.terminalStation}</span></li>);
     }
     if (trace.takeOffDay || trace.arriveDay) {
         liArr.push(<li><span>出发:{trace.takeOffDay}</span></li>);
@@ -187,7 +187,7 @@ const hospitalCard = (trace, traceStyle) => {
                 <li><span>姓名:</span><span>{trace.name}</span></li>
                 <li><span>{trace.visitTime}</span></li>
             </ul>
-            <img src={`../../images/life_class/${trace.catg}_life_big.png`}></img>
+            <img src={require(`../../images/life_class/${trace.catg}_life_big.png`)}></img>
         </div>
     );
 }
@@ -201,7 +201,7 @@ const ckCard = (trace, traceStyle) => {
                 <li><span>{trace.pxh}</span></li>
                 <li><span>{trace.hslbz_zhwz}</span></li>
             </ul>
-            <img src={`../../images/life_class/${trace.catg}_life_big.png`}></img>
+            <img src={require(`../../images/life_class/${trace.catg}_life_big.png`)}></img>
         </div>
     );
 }
@@ -321,4 +321,4 @@ export function sameKeyGen(trace) {
     return "abc";
 }
 
-export default {typeOptions, showContent, dataTypeIsShow, sameKeyGen}
+export default { typeOptions, showContent, dataTypeIsShow, sameKeyGen }
