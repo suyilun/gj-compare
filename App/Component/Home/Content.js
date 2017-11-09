@@ -575,7 +575,7 @@ class Content extends React.Component {
                         </Spin>
                     </div>
                     <div
-                        className="b-right" style={{ overflowX: "hidden", height: BOTTOM_HEIGHT }}>
+                        className="b-right" style={{ overflow: "hidden", height: BOTTOM_HEIGHT }}>
                         <Row gutter={4}>
                             <Col span={10} style={{ height: BOTTOM_HEIGHT }}>
                                 <TraceTable
@@ -584,8 +584,9 @@ class Content extends React.Component {
                                     showTypes={showTypes}
                                 />
                             </Col>
-                            <Col span={14} style={{ boxShadow: '-6px 0 6px -4px rgba(0,0,0,.2)' }}>
+                            <Col span={14} style={{ boxShadow: '-6px 0 6px -4px rgba(0,0,0,.2)',overflowY:"hidden",overflowX:"auto" }}>
                                 <HeatMap
+                                    height={BOTTOM_HEIGHT}
                                     data={analyseDays}
                                     startDay={moment(endTime, "YYYY-MM-DD").format("YYYYMMDD")}
                                     endDay={moment(startTime, "YYYY-MM-DD").format("YYYYMMDD")}

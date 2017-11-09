@@ -188,11 +188,13 @@ export default class HeatMap extends React.Component {
         endDay: '20171111',//moment(new Date()).add(-365, "day").format("YYYYMMDD"),
     }
     render() {
-        const { title, monthLabels, weekLabels, startDay, endDay, data, classForDay, titleForDay, clickForDay } = this.props;
+        const { title,height, monthLabels, weekLabels, startDay, endDay, data, classForDay, titleForDay, clickForDay } = this.props;
         const dataMap = {};
+        const weekNumSize=Math.ceil(moment(startDay).diff(moment(endDay))/(1000*60*60*24*7));
         Object.keys(data).map(day => {
             dataMap[day] = { value: data[day] }
         })
+        const svgWidth=weekNumSize*11+80;
         // data.map(dataRow => {
         //     dataMap[dataRow.time] = dataRow;
         // })
@@ -201,8 +203,8 @@ export default class HeatMap extends React.Component {
         // 如果没有title
         return (
             <svg
-                width={'100%'}
-                height={'100%'}
+                width={svgWidth}
+                height={height-20}
                 className={"heat-map"}
                 xmlns="http://www.w3.org/2000/svg"
                 xmlnsXlink="http://www.w3.org/1999/xlink"
